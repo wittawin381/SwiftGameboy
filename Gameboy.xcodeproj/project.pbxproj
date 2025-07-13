@@ -17,6 +17,22 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
+				Emulator/Cartridge/Cartridge.swift,
+				Emulator/Cartridge/MemoryBankController.swift,
+				Emulator/CPU/ALU.swift,
+				Emulator/CPU/CPU.swift,
+				Emulator/CPU/IORangeDelegate.swift,
+				Emulator/CPU/MemoryBusDelegate.swift,
+				Emulator/Device/Device.swift,
+				Emulator/Emulator.swift,
+				Emulator/Instructions/Instruction.swift,
+				"Emulator/Instructions/Instruction+Helper.swift",
+				Emulator/PPU/PPU.swift,
+				Emulator/Ref.swift,
+				Extension/BitAccessible.swift,
+				Extension/BitTestable.swift,
+				"Extension/Bool+Extension.swift",
+				"Extension/UInt8+Extension.swift",
 				Renderer.swift,
 				Shaders.metal,
 			);

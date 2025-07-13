@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>top-level-items</key>
+	<array>
+		<dict>
+			<key>destination</key>
+			<dict>
+				<key>location-parameters</key>
+				<dict>
+					<key>EndingColumnNumber</key>
+					<string>0</string>
+					<key>EndingLineNumber</key>
+					<string>1489</string>
+					<key>StartingColumnNumber</key>
+					<string>0</string>
+					<key>StartingLineNumber</key>
+					<string>1488</string>
+					<key>Timestamp</key>
+					<string>773687115.448715</string>
+				</dict>
+				<key>rebasable-url</key>
+				<dict>
+					<key>base</key>
+					<string>workspace</string>
+					<key>payload</key>
+					<dict>
+						<key>relative-path</key>
+						<string>Gameboy Shared/Emulator/Instructions/Instruction.swift</string>
+					</dict>
+				</dict>
+			</dict>
+			<key>text-context</key>
+			<dict>
+				<key>focused</key>
+				<string>            let leastSignificantByte = cpu.memory(at: cpu.stackPointer)
+</string>
+				<key>leading</key>
+				<string>        /// POP rr
+        0xF1: InstructionBuilder(cycles: 3) { cpu in
+</string>
+				<key>trailing</key>
+				<string>            cpu.stackPointer += 1
+            let mostSignificantByte = cpu.memory(at: cpu.stackPointer)
+            cpu.stackPointer += 1
+</string>
+			</dict>
+			<key>title</key>
+			<string>Check Flag F changed affect anything</string>
+			<key>type</key>
+			<string>bookmark</string>
+		</dict>
+		<dict>
+			<key>children</key>
+			<array>
+				<dict>
+					<key>destination</key>
+					<dict>
+						<key>location-parameters</key>
+						<dict>
+							<key>EndingColumnNumber</key>
+							<string>0</string>
+							<key>EndingLineNumber</key>
+							<string>1151</string>
+							<key>StartingColumnNumber</key>
+							<string>0</string>
+							<key>StartingLineNumber</key>
+							<string>1150</string>
+							<key>Timestamp</key>
+							<string>773687115.448684</string>
+						</dict>
+						<key>rebasable-url</key>
+						<dict>
+							<key>base</key>
+							<string>workspace</string>
+							<key>payload</key>
+							<dict>
+								<key>relative-path</key>
+								<string>Gameboy Shared/Emulator/Instructions/Instruction.swift</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>text-context</key>
+					<dict>
+						<key>focused</key>
+						<string>        0xC5: InstructionBuilder(cycles: 4) { cpu in
+</string>
+						<key>leading</key>
+						<string>        },
+        /// PUSH rr
+</string>
+						<key>trailing</key>
+						<string>            cpu.stackPointer -= 1
+            cpu.writeValue(cpu.registerBC.hi, toMemoryAt: cpu.stackPointer)
+            cpu.stackPointer -= 1
+</string>
+					</dict>
+					<key>title</key>
+					<string>Check wether stack pointer use ram or memeory</string>
+					<key>type</key>
+					<string>bookmark</string>
+				</dict>
+				<dict>
+					<key>destination</key>
+					<dict>
+						<key>location-parameters</key>
+						<dict>
+							<key>EndingColumnNumber</key>
+							<string>0</string>
+							<key>EndingLineNumber</key>
+							<string>1300</string>
+							<key>StartingColumnNumber</key>
+							<string>0</string>
+							<key>StartingLineNumber</key>
+							<string>1299</string>
+							<key>Timestamp</key>
+							<string>773687115.448662</string>
+						</dict>
+						<key>rebasable-url</key>
+						<dict>
+							<key>base</key>
+							<string>workspace</string>
+							<key>payload</key>
+							<dict>
+								<key>relative-path</key>
+								<string>Gameboy Shared/Emulator/Instructions/Instruction.swift</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>text-context</key>
+					<dict>
+						<key>focused</key>
+						<string>        0xD5: InstructionBuilder(cycles: 4) { cpu in
+</string>
+						<key>leading</key>
+						<string>        },
+        /// PUSH rr
+</string>
+						<key>trailing</key>
+						<string>            cpu.stackPointer -= 1
+            cpu.writeValue(cpu.registerDE.hi, toMemoryAt: cpu.stackPointer)
+            cpu.stackPointer -= 1
+</string>
+					</dict>
+					<key>title</key>
+					<string>Check wether stack pointer use ram or memeory</string>
+					<key>type</key>
+					<string>bookmark</string>
+				</dict>
+				<dict>
+					<key>destination</key>
+					<dict>
+						<key>location-parameters</key>
+						<dict>
+							<key>EndingColumnNumber</key>
+							<string>0</string>
+							<key>EndingLineNumber</key>
+							<string>1412</string>
+							<key>StartingColumnNumber</key>
+							<string>0</string>
+							<key>StartingLineNumber</key>
+							<string>1411</string>
+							<key>Timestamp</key>
+							<string>773687115.4487211</string>
+						</dict>
+						<key>rebasable-url</key>
+						<dict>
+							<key>base</key>
+							<string>workspace</string>
+							<key>payload</key>
+							<dict>
+								<key>relative-path</key>
+								<string>Gameboy Shared/Emulator/Instructions/Instruction.swift</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>text-context</key>
+					<dict>
+						<key>focused</key>
+						<string>        0xE5: InstructionBuilder(cycles: 4) { cpu in
+</string>
+						<key>leading</key>
+						<string>        },
+        /// PUSH rr
+</string>
+						<key>trailing</key>
+						<string>            cpu.stackPointer -= 1
+            cpu.writeValue(cpu.registerHL.hi, toMemoryAt: cpu.stackPointer)
+            cpu.stackPointer -= 1
+</string>
+					</dict>
+					<key>title</key>
+					<string>Check wether stack pointer use ram or memeory</string>
+					<key>type</key>
+					<string>bookmark</string>
+				</dict>
+				<dict>
+					<key>destination</key>
+					<dict>
+						<key>location-parameters</key>
+						<dict>
+							<key>EndingColumnNumber</key>
+							<string>0</string>
+							<key>EndingLineNumber</key>
+							<string>1506</string>
+							<key>StartingColumnNumber</key>
+							<string>0</string>
+							<key>StartingLineNumber</key>
+							<string>1505</string>
+							<key>Timestamp</key>
+							<string>773687115.448702</string>
+						</dict>
+						<key>rebasable-url</key>
+						<dict>
+							<key>base</key>
+							<string>workspace</string>
+							<key>payload</key>
+							<dict>
+								<key>relative-path</key>
+								<string>Gameboy Shared/Emulator/Instructions/Instruction.swift</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>text-context</key>
+					<dict>
+						<key>focused</key>
+						<string>        0xF5: InstructionBuilder(cycles: 4) { cpu in
+</string>
+						<key>leading</key>
+						<string>        },
+        /// PUSH rr
+</string>
+						<key>trailing</key>
+						<string>            cpu.stackPointer -= 1
+            cpu.writeValue(cpu.registerAF.hi, toMemoryAt: cpu.stackPointer)
+            cpu.stackPointer -= 1
+</string>
+					</dict>
+					<key>title</key>
+					<string>Check wether stack pointer use ram or memeory</string>
+					<key>type</key>
+					<string>bookmark</string>
+				</dict>
+				<dict>
+					<key>destination</key>
+					<dict>
+						<key>location-parameters</key>
+						<dict>
+							<key>EndingColumnNumber</key>
+							<string>0</string>
+							<key>EndingLineNumber</key>
+							<string>1111</string>
+							<key>StartingColumnNumber</key>
+							<string>0</string>
+							<key>StartingLineNumber</key>
+							<string>1110</string>
+							<key>Timestamp</key>
+							<string>773687115.448647</string>
+						</dict>
+						<key>rebasable-url</key>
+						<dict>
+							<key>base</key>
+							<string>workspace</string>
+							<key>payload</key>
+							<dict>
+								<key>relative-path</key>
+								<string>Gameboy Shared/Emulator/Instructions/Instruction.swift</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>text-context</key>
+					<dict>
+						<key>focused</key>
+						<string>            let leastSignificantByte = cpu.memory(at: cpu.stackPointer)
+</string>
+						<key>leading</key>
+						<string>        /// POP rr
+        0xC1: InstructionBuilder(cycles: 3) { cpu in
+</string>
+						<key>trailing</key>
+						<string>            cpu.stackPointer += 1
+            let mostSignificantByte = cpu.memory(at: cpu.stackPointer)
+            cpu.stackPointer += 1
+</string>
+					</dict>
+					<key>title</key>
+					<string>Check wether stack pointer use ram or memeory</string>
+					<key>type</key>
+					<string>bookmark</string>
+				</dict>
+				<dict>
+					<key>destination</key>
+					<dict>
+						<key>location-parameters</key>
+						<dict>
+							<key>EndingColumnNumber</key>
+							<string>0</string>
+							<key>EndingLineNumber</key>
+							<string>1399</string>
+							<key>StartingColumnNumber</key>
+							<string>0</string>
+							<key>StartingLineNumber</key>
+							<string>1398</string>
+							<key>Timestamp</key>
+							<string>773687115.4486901</string>
+						</dict>
+						<key>rebasable-url</key>
+						<dict>
+							<key>base</key>
+							<string>workspace</string>
+							<key>payload</key>
+							<dict>
+								<key>relative-path</key>
+								<string>Gameboy Shared/Emulator/Instructions/Instruction.swift</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>text-context</key>
+					<dict>
+						<key>focused</key>
+						<string>            let leastSignificantByte = cpu.memory(at: cpu.stackPointer)
+</string>
+						<key>leading</key>
+						<string>        /// POP rr
+        0xE1: InstructionBuilder(cycles: 3) { cpu in
+</string>
+						<key>trailing</key>
+						<string>            cpu.stackPointer += 1
+            let mostSignificantByte = cpu.memory(at: cpu.stackPointer)
+            cpu.stackPointer += 1
+</string>
+					</dict>
+					<key>title</key>
+					<string>Check wether stack pointer use ram or memeory</string>
+					<key>type</key>
+					<string>bookmark</string>
+				</dict>
+				<dict>
+					<key>destination</key>
+					<dict>
+						<key>location-parameters</key>
+						<dict>
+							<key>EndingColumnNumber</key>
+							<string>0</string>
+							<key>EndingLineNumber</key>
+							<string>1488</string>
+							<key>StartingColumnNumber</key>
+							<string>0</string>
+							<key>StartingLineNumber</key>
+							<string>1487</string>
+							<key>Timestamp</key>
+							<string>773687115.448696</string>
+						</dict>
+						<key>rebasable-url</key>
+						<dict>
+							<key>base</key>
+							<string>workspace</string>
+							<key>payload</key>
+							<dict>
+								<key>relative-path</key>
+								<string>Gameboy Shared/Emulator/Instructions/Instruction.swift</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>text-context</key>
+					<dict>
+						<key>focused</key>
+						<string>        0xF1: InstructionBuilder(cycles: 3) { cpu in
+</string>
+						<key>leading</key>
+						<string>        },
+        /// POP rr
+</string>
+						<key>trailing</key>
+						<string>            let leastSignificantByte = cpu.memory(at: cpu.stackPointer)
+            cpu.stackPointer += 1
+            let mostSignificantByte = cpu.memory(at: cpu.stackPointer)
+</string>
+					</dict>
+					<key>title</key>
+					<string>Check wether stack pointer use ram or memeory</string>
+					<key>type</key>
+					<string>bookmark</string>
+				</dict>
+			</array>
+			<key>title</key>
+			<string>Check Stack pointer memory</string>
+			<key>type</key>
+			<string>group</string>
+		</dict>
+		<dict>
+			<key>destination</key>
+			<dict>
+				<key>location-parameters</key>
+				<dict>
+					<key>EndingColumnNumber</key>
+					<string>0</string>
+					<key>EndingLineNumber</key>
+					<string>287</string>
+					<key>StartingColumnNumber</key>
+					<string>0</string>
+					<key>StartingLineNumber</key>
+					<string>286</string>
+					<key>Timestamp</key>
+					<string>773687115.448678</string>
+				</dict>
+				<key>rebasable-url</key>
+				<dict>
+					<key>base</key>
+					<string>workspace</string>
+					<key>payload</key>
+					<dict>
+						<key>relative-path</key>
+						<string>Gameboy Shared/Emulator/Instructions/Instruction.swift</string>
+					</dict>
+				</dict>
+			</dict>
+			<key>text-context</key>
+			<dict>
+				<key>focused</key>
+				<string>            //TODO: - Implement DAA Instruction
+</string>
+				<key>leading</key>
+				<string>        /// DAA
+        0x27: InstructionBuilder(cycles: 1) { cpu in
+</string>
+				<key>trailing</key>
+				<string>        },
+        /// JR cc, e
+        0x28: InstructionBuilder { cpu in
+</string>
+			</dict>
+			<key>title</key>
+			<string>Implement DAA Instruction</string>
+			<key>type</key>
+			<string>bookmark</string>
+		</dict>
+		<dict>
+			<key>destination</key>
+			<dict>
+				<key>location-parameters</key>
+				<dict>
+					<key>EndingColumnNumber</key>
+					<string>0</string>
+					<key>EndingLineNumber</key>
+					<string>361</string>
+					<key>StartingColumnNumber</key>
+					<string>0</string>
+					<key>StartingLineNumber</key>
+					<string>360</string>
+					<key>Timestamp</key>
+					<string>773687115.448709</string>
+				</dict>
+				<key>rebasable-url</key>
+				<dict>
+					<key>base</key>
+					<string>workspace</string>
+					<key>payload</key>
+					<dict>
+						<key>relative-path</key>
+						<string>Gameboy Shared/Emulator/Instructions/Instruction.swift</string>
+					</dict>
+				</dict>
+			</dict>
+			<key>text-context</key>
+			<dict>
+				<key>focused</key>
+				<string>        },
+</string>
+				<key>leading</key>
+				<string>                return Instruction(cycles: 2) { _ in }
+            }
+</string>
+				<key>trailing</key>
+				<string>        /// LD (HL-), A
+        0x32: InstructionBuilder(cycles: 2) { cpu in
+            let address = cpu.registerHL.all
+</string>
+			</dict>
+			<key>title</key>
+			<string>Implement 0x31</string>
+			<key>type</key>
+			<string>bookmark</string>
+		</dict>
+		<dict>
+			<key>destination</key>
+			<dict>
+				<key>location-parameters</key>
+				<dict>
+					<key>EndingColumnNumber</key>
+					<string>0</string>
+					<key>EndingLineNumber</key>
+					<string>1344</string>
+					<key>StartingColumnNumber</key>
+					<string>0</string>
+					<key>StartingLineNumber</key>
+					<string>1343</string>
+					<key>Timestamp</key>
+					<string>773687115.448727</string>
+				</dict>
+				<key>rebasable-url</key>
+				<dict>
+					<key>base</key>
+					<string>workspace</string>
+					<key>payload</key>
+					<dict>
+						<key>relative-path</key>
+						<string>Gameboy Shared/Emulator/Instructions/Instruction.swift</string>
+					</dict>
+				</dict>
+			</dict>
+			<key>text-context</key>
+			<dict>
+				<key>focused</key>
+				<string>            cpu.interruptEnable = 1
+</string>
+				<key>leading</key>
+				<string>            cpu.stackPointer += 1
+            cpu.programCounter = (UInt16(mostSignificantByte) &lt;&lt; 8) | UInt16(leastSignificantByte)
+</string>
+				<key>trailing</key>
+				<string>        },
+        /// JP cc, nn
+        0xDA: InstructionBuilder { cpu in
+</string>
+			</dict>
+			<key>title</key>
+			<string>Check if IE register is equal to IME in document</string>
+			<key>type</key>
+			<string>bookmark</string>
+		</dict>
+		<dict>
+			<key>destination</key>
+			<dict>
+				<key>location-parameters</key>
+				<dict>
+					<key>EndingColumnNumber</key>
+					<string>0</string>
+					<key>EndingLineNumber</key>
+					<string>1551</string>
+					<key>StartingColumnNumber</key>
+					<string>0</string>
+					<key>StartingLineNumber</key>
+					<string>1550</string>
+					<key>Timestamp</key>
+					<string>773687115.448669</string>
+				</dict>
+				<key>rebasable-url</key>
+				<dict>
+					<key>base</key>
+					<string>workspace</string>
+					<key>payload</key>
+					<dict>
+						<key>relative-path</key>
+						<string>Gameboy Shared/Emulator/Instructions/Instruction.swift</string>
+					</dict>
+				</dict>
+			</dict>
+			<key>text-context</key>
+			<dict>
+				<key>focused</key>
+				<string>            cpu.interruptEnable = 1
+</string>
+				<key>leading</key>
+				<string>        /// DI
+        0xFB: InstructionBuilder(cycles: 1) { cpu in
+</string>
+				<key>trailing</key>
+				<string>        },
+        /// CP n
+        0xFE: InstructionBuilder(cycles: 2) { cpu in
+</string>
+			</dict>
+			<key>title</key>
+			<string>Supposed to be scheduled</string>
+			<key>type</key>
+			<string>bookmark</string>
+		</dict>
+	</array>
+</dict>
+</plist>
