@@ -39,6 +39,16 @@ struct PPU {
     var spritePalette1: UInt8 = 0
     
     // TODO: - add support for CGB
+    
+    func render(vRam: [UInt8]) -> PixelRenderer {
+        
+    }
+    
+    private func getTile(vRam: [UInt8]) -> {
+        if lcdControl.backgroundTileMapArea == 1 {
+            
+        }
+    }
 }
 
 struct PixelFetcher {

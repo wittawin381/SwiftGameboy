@@ -28,6 +28,7 @@
 				Emulator/Instructions/Instruction.swift,
 				"Emulator/Instructions/Instruction+Helper.swift",
 				Emulator/PPU/PPU.swift,
+				Emulator/PPU/Renderer.swift,
 				Emulator/Ref.swift,
 				Extension/BitAccessible.swift,
 				Extension/BitTestable.swift,

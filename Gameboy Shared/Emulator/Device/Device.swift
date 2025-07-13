@@ -9,6 +9,7 @@ import Foundation
 
 struct Device {
     var cpu: CPU
+    var ppu: PPU
     @Ref var cartridge: Cartridge
     @Ref var vRam: [UInt8]
     @Ref var internalRam: [UInt8]
@@ -29,5 +30,11 @@ struct Device {
             objectAttributeMemory: _objectAttributeMemory.projectedValue
         )
         self.cpu = CPU(memoryBusDelegate: delegate)
+        self.ppu = PPU()
+    }
+    
+    mutating func run() -> PixelRenderer {
+        cpu.run()
+        return ppu.render(vRam: vRam)
     }
 }
