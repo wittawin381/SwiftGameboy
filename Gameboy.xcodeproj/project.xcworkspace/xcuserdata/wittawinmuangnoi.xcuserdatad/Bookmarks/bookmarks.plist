@@ -12,13 +12,13 @@
 					<key>EndingColumnNumber</key>
 					<string>0</string>
 					<key>EndingLineNumber</key>
-					<string>1489</string>
+					<string>1583</string>
 					<key>StartingColumnNumber</key>
 					<string>0</string>
 					<key>StartingLineNumber</key>
-					<string>1488</string>
+					<string>1582</string>
 					<key>Timestamp</key>
-					<string>773687115.448715</string>
+					<string>775290157.7435549</string>
 				</dict>
 				<key>rebasable-url</key>
 				<dict>
@@ -34,15 +34,15 @@
 			<key>text-context</key>
 			<dict>
 				<key>focused</key>
-				<string>            let leastSignificantByte = cpu.memory(at: cpu.stackPointer)
+				<string>            let leastSignificantByte = readMemory(cpu.stackPointer)
 </string>
 				<key>leading</key>
 				<string>        /// POP rr
-        0xF1: InstructionBuilder(cycles: 3) { cpu in
+        0xF1: InstructionBuilder(cycles: 3) { cpu, readMemory, writeMemory in
 </string>
 				<key>trailing</key>
 				<string>            cpu.stackPointer += 1
-            let mostSignificantByte = cpu.memory(at: cpu.stackPointer)
+            let mostSignificantByte = readMemory(cpu.stackPointer)
             cpu.stackPointer += 1
 </string>
 			</dict>
@@ -62,13 +62,13 @@
 							<key>EndingColumnNumber</key>
 							<string>0</string>
 							<key>EndingLineNumber</key>
-							<string>1151</string>
+							<string>1209</string>
 							<key>StartingColumnNumber</key>
 							<string>0</string>
 							<key>StartingLineNumber</key>
-							<string>1150</string>
+							<string>1208</string>
 							<key>Timestamp</key>
-							<string>773687115.448684</string>
+							<string>775245336.004514</string>
 						</dict>
 						<key>rebasable-url</key>
 						<dict>
@@ -84,7 +84,7 @@
 					<key>text-context</key>
 					<dict>
 						<key>focused</key>
-						<string>        0xC5: InstructionBuilder(cycles: 4) { cpu in
+						<string>        0xC5: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
 </string>
 						<key>leading</key>
 						<string>        },
@@ -92,7 +92,7 @@
 </string>
 						<key>trailing</key>
 						<string>            cpu.stackPointer -= 1
-            cpu.writeValue(cpu.registerBC.hi, toMemoryAt: cpu.stackPointer)
+            writeMemory(cpu.registerBC.hi, cpu.stackPointer)
             cpu.stackPointer -= 1
 </string>
 					</dict>
@@ -109,13 +109,13 @@
 							<key>EndingColumnNumber</key>
 							<string>0</string>
 							<key>EndingLineNumber</key>
-							<string>1300</string>
+							<string>1381</string>
 							<key>StartingColumnNumber</key>
 							<string>0</string>
 							<key>StartingLineNumber</key>
-							<string>1299</string>
+							<string>1380</string>
 							<key>Timestamp</key>
-							<string>773687115.448662</string>
+							<string>775245336.0055079</string>
 						</dict>
 						<key>rebasable-url</key>
 						<dict>
@@ -131,7 +131,7 @@
 					<key>text-context</key>
 					<dict>
 						<key>focused</key>
-						<string>        0xD5: InstructionBuilder(cycles: 4) { cpu in
+						<string>        0xD5: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
 </string>
 						<key>leading</key>
 						<string>        },
@@ -139,7 +139,7 @@
 </string>
 						<key>trailing</key>
 						<string>            cpu.stackPointer -= 1
-            cpu.writeValue(cpu.registerDE.hi, toMemoryAt: cpu.stackPointer)
+            writeMemory(cpu.registerDE.hi, cpu.stackPointer)
             cpu.stackPointer -= 1
 </string>
 					</dict>
@@ -156,13 +156,13 @@
 							<key>EndingColumnNumber</key>
 							<string>0</string>
 							<key>EndingLineNumber</key>
-							<string>1412</string>
+							<string>1500</string>
 							<key>StartingColumnNumber</key>
 							<string>0</string>
 							<key>StartingLineNumber</key>
-							<string>1411</string>
+							<string>1499</string>
 							<key>Timestamp</key>
-							<string>773687115.4487211</string>
+							<string>775245336.00502</string>
 						</dict>
 						<key>rebasable-url</key>
 						<dict>
@@ -178,7 +178,7 @@
 					<key>text-context</key>
 					<dict>
 						<key>focused</key>
-						<string>        0xE5: InstructionBuilder(cycles: 4) { cpu in
+						<string>        0xE5: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
 </string>
 						<key>leading</key>
 						<string>        },
@@ -186,7 +186,7 @@
 </string>
 						<key>trailing</key>
 						<string>            cpu.stackPointer -= 1
-            cpu.writeValue(cpu.registerHL.hi, toMemoryAt: cpu.stackPointer)
+            writeMemory(cpu.registerHL.hi, cpu.stackPointer)
             cpu.stackPointer -= 1
 </string>
 					</dict>
@@ -203,13 +203,13 @@
 							<key>EndingColumnNumber</key>
 							<string>0</string>
 							<key>EndingLineNumber</key>
-							<string>1506</string>
+							<string>1600</string>
 							<key>StartingColumnNumber</key>
 							<string>0</string>
 							<key>StartingLineNumber</key>
-							<string>1505</string>
+							<string>1599</string>
 							<key>Timestamp</key>
-							<string>773687115.448702</string>
+							<string>775290157.74354</string>
 						</dict>
 						<key>rebasable-url</key>
 						<dict>
@@ -225,7 +225,7 @@
 					<key>text-context</key>
 					<dict>
 						<key>focused</key>
-						<string>        0xF5: InstructionBuilder(cycles: 4) { cpu in
+						<string>        0xF5: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
 </string>
 						<key>leading</key>
 						<string>        },
@@ -233,7 +233,7 @@
 </string>
 						<key>trailing</key>
 						<string>            cpu.stackPointer -= 1
-            cpu.writeValue(cpu.registerAF.hi, toMemoryAt: cpu.stackPointer)
+            writeMemory(cpu.registerAF.hi, cpu.stackPointer)
             cpu.stackPointer -= 1
 </string>
 					</dict>
@@ -250,13 +250,13 @@
 							<key>EndingColumnNumber</key>
 							<string>0</string>
 							<key>EndingLineNumber</key>
-							<string>1111</string>
+							<string>1163</string>
 							<key>StartingColumnNumber</key>
 							<string>0</string>
 							<key>StartingLineNumber</key>
-							<string>1110</string>
+							<string>1162</string>
 							<key>Timestamp</key>
-							<string>773687115.448647</string>
+							<string>775245336.00539</string>
 						</dict>
 						<key>rebasable-url</key>
 						<dict>
@@ -272,15 +272,15 @@
 					<key>text-context</key>
 					<dict>
 						<key>focused</key>
-						<string>            let leastSignificantByte = cpu.memory(at: cpu.stackPointer)
+						<string>            let leastSignificantByte = readMemory(cpu.stackPointer)
 </string>
 						<key>leading</key>
 						<string>        /// POP rr
-        0xC1: InstructionBuilder(cycles: 3) { cpu in
+        0xC1: InstructionBuilder(cycles: 3) { cpu, readMemory, writeMemory in
 </string>
 						<key>trailing</key>
 						<string>            cpu.stackPointer += 1
-            let mostSignificantByte = cpu.memory(at: cpu.stackPointer)
+            let mostSignificantByte = readMemory(cpu.stackPointer)
             cpu.stackPointer += 1
 </string>
 					</dict>
@@ -297,60 +297,13 @@
 							<key>EndingColumnNumber</key>
 							<string>0</string>
 							<key>EndingLineNumber</key>
-							<string>1399</string>
-							<key>StartingColumnNumber</key>
-							<string>0</string>
-							<key>StartingLineNumber</key>
-							<string>1398</string>
-							<key>Timestamp</key>
-							<string>773687115.4486901</string>
-						</dict>
-						<key>rebasable-url</key>
-						<dict>
-							<key>base</key>
-							<string>workspace</string>
-							<key>payload</key>
-							<dict>
-								<key>relative-path</key>
-								<string>Gameboy Shared/Emulator/Instructions/Instruction.swift</string>
-							</dict>
-						</dict>
-					</dict>
-					<key>text-context</key>
-					<dict>
-						<key>focused</key>
-						<string>            let leastSignificantByte = cpu.memory(at: cpu.stackPointer)
-</string>
-						<key>leading</key>
-						<string>        /// POP rr
-        0xE1: InstructionBuilder(cycles: 3) { cpu in
-</string>
-						<key>trailing</key>
-						<string>            cpu.stackPointer += 1
-            let mostSignificantByte = cpu.memory(at: cpu.stackPointer)
-            cpu.stackPointer += 1
-</string>
-					</dict>
-					<key>title</key>
-					<string>Check wether stack pointer use ram or memeory</string>
-					<key>type</key>
-					<string>bookmark</string>
-				</dict>
-				<dict>
-					<key>destination</key>
-					<dict>
-						<key>location-parameters</key>
-						<dict>
-							<key>EndingColumnNumber</key>
-							<string>0</string>
-							<key>EndingLineNumber</key>
-							<string>1488</string>
-							<key>StartingColumnNumber</key>
-							<string>0</string>
-							<key>StartingLineNumber</key>
 							<string>1487</string>
+							<key>StartingColumnNumber</key>
+							<string>0</string>
+							<key>StartingLineNumber</key>
+							<string>1486</string>
 							<key>Timestamp</key>
-							<string>773687115.448696</string>
+							<string>775245336.005271</string>
 						</dict>
 						<key>rebasable-url</key>
 						<dict>
@@ -366,16 +319,63 @@
 					<key>text-context</key>
 					<dict>
 						<key>focused</key>
-						<string>        0xF1: InstructionBuilder(cycles: 3) { cpu in
+						<string>            let leastSignificantByte = readMemory(cpu.stackPointer)
+</string>
+						<key>leading</key>
+						<string>        /// POP rr
+        0xE1: InstructionBuilder(cycles: 3) { cpu, readMemory, writeMemory in
+</string>
+						<key>trailing</key>
+						<string>            cpu.stackPointer += 1
+            let mostSignificantByte = readMemory(cpu.stackPointer)
+            cpu.stackPointer += 1
+</string>
+					</dict>
+					<key>title</key>
+					<string>Check wether stack pointer use ram or memeory</string>
+					<key>type</key>
+					<string>bookmark</string>
+				</dict>
+				<dict>
+					<key>destination</key>
+					<dict>
+						<key>location-parameters</key>
+						<dict>
+							<key>EndingColumnNumber</key>
+							<string>0</string>
+							<key>EndingLineNumber</key>
+							<string>1582</string>
+							<key>StartingColumnNumber</key>
+							<string>0</string>
+							<key>StartingLineNumber</key>
+							<string>1581</string>
+							<key>Timestamp</key>
+							<string>775290157.743522</string>
+						</dict>
+						<key>rebasable-url</key>
+						<dict>
+							<key>base</key>
+							<string>workspace</string>
+							<key>payload</key>
+							<dict>
+								<key>relative-path</key>
+								<string>Gameboy Shared/Emulator/Instructions/Instruction.swift</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>text-context</key>
+					<dict>
+						<key>focused</key>
+						<string>        0xF1: InstructionBuilder(cycles: 3) { cpu, readMemory, writeMemory in
 </string>
 						<key>leading</key>
 						<string>        },
         /// POP rr
 </string>
 						<key>trailing</key>
-						<string>            let leastSignificantByte = cpu.memory(at: cpu.stackPointer)
+						<string>            let leastSignificantByte = readMemory(cpu.stackPointer)
             cpu.stackPointer += 1
-            let mostSignificantByte = cpu.memory(at: cpu.stackPointer)
+            let mostSignificantByte = readMemory(cpu.stackPointer)
 </string>
 					</dict>
 					<key>title</key>
@@ -397,13 +397,13 @@
 					<key>EndingColumnNumber</key>
 					<string>0</string>
 					<key>EndingLineNumber</key>
-					<string>287</string>
+					<string>315</string>
 					<key>StartingColumnNumber</key>
 					<string>0</string>
 					<key>StartingLineNumber</key>
-					<string>286</string>
+					<string>314</string>
 					<key>Timestamp</key>
-					<string>773687115.448678</string>
+					<string>775245336.0051399</string>
 				</dict>
 				<key>rebasable-url</key>
 				<dict>
@@ -423,12 +423,12 @@
 </string>
 				<key>leading</key>
 				<string>        /// DAA
-        0x27: InstructionBuilder(cycles: 1) { cpu in
+        0x27: InstructionBuilder(cycles: 1) { cpu, readMemory, writeMemory in
 </string>
 				<key>trailing</key>
 				<string>        },
         /// JR cc, e
-        0x28: InstructionBuilder { cpu in
+        0x28: InstructionBuilder { cpu, readMemory, writeMemory in
 </string>
 			</dict>
 			<key>title</key>
@@ -444,13 +444,13 @@
 					<key>EndingColumnNumber</key>
 					<string>0</string>
 					<key>EndingLineNumber</key>
-					<string>361</string>
+					<string>394</string>
 					<key>StartingColumnNumber</key>
 					<string>0</string>
 					<key>StartingLineNumber</key>
-					<string>360</string>
+					<string>393</string>
 					<key>Timestamp</key>
-					<string>773687115.448709</string>
+					<string>775245336.004902</string>
 				</dict>
 				<key>rebasable-url</key>
 				<dict>
@@ -469,13 +469,13 @@
 				<string>        },
 </string>
 				<key>leading</key>
-				<string>                return Instruction(cycles: 2) { _ in }
+				<string>                }
             }
 </string>
 				<key>trailing</key>
-				<string>        /// LD (HL-), A
-        0x32: InstructionBuilder(cycles: 2) { cpu in
-            let address = cpu.registerHL.all
+				<string>        /// LD rr 16 bit
+        0x31: InstructionBuilder(cycles: 3) { cpu, readMemory, writeMemory in
+            let leastSignificantByte: UInt8 = readMemory(cpu.programCounter)
 </string>
 			</dict>
 			<key>title</key>
@@ -491,13 +491,13 @@
 					<key>EndingColumnNumber</key>
 					<string>0</string>
 					<key>EndingLineNumber</key>
-					<string>1344</string>
+					<string>1426</string>
 					<key>StartingColumnNumber</key>
 					<string>0</string>
 					<key>StartingLineNumber</key>
-					<string>1343</string>
+					<string>1425</string>
 					<key>Timestamp</key>
-					<string>773687115.448727</string>
+					<string>775245336.004657</string>
 				</dict>
 				<key>rebasable-url</key>
 				<dict>
@@ -513,7 +513,7 @@
 			<key>text-context</key>
 			<dict>
 				<key>focused</key>
-				<string>            cpu.interruptEnable = 1
+				<string>            cpu.interruptMasterEnabled = true
 </string>
 				<key>leading</key>
 				<string>            cpu.stackPointer += 1
@@ -522,7 +522,7 @@
 				<key>trailing</key>
 				<string>        },
         /// JP cc, nn
-        0xDA: InstructionBuilder { cpu in
+        0xDA: InstructionBuilder { cpu, readMemory, writeMemory in
 </string>
 			</dict>
 			<key>title</key>
@@ -538,13 +538,13 @@
 					<key>EndingColumnNumber</key>
 					<string>0</string>
 					<key>EndingLineNumber</key>
-					<string>1551</string>
+					<string>1649</string>
 					<key>StartingColumnNumber</key>
 					<string>0</string>
 					<key>StartingLineNumber</key>
-					<string>1550</string>
+					<string>1648</string>
 					<key>Timestamp</key>
-					<string>773687115.448669</string>
+					<string>775290157.743548</string>
 				</dict>
 				<key>rebasable-url</key>
 				<dict>
@@ -560,16 +560,16 @@
 			<key>text-context</key>
 			<dict>
 				<key>focused</key>
-				<string>            cpu.interruptEnable = 1
+				<string>            cpu.interruptMasterEnabled = true
 </string>
 				<key>leading</key>
 				<string>        /// DI
-        0xFB: InstructionBuilder(cycles: 1) { cpu in
+        0xFB: InstructionBuilder(cycles: 1) { cpu, readMemory, writeMemory in
 </string>
 				<key>trailing</key>
 				<string>        },
         /// CP n
-        0xFE: InstructionBuilder(cycles: 2) { cpu in
+        0xFE: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
 </string>
 			</dict>
 			<key>title</key>

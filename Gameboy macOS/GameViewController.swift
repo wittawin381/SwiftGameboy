@@ -30,13 +30,23 @@ class GameViewController: NSViewController {
 
         mtkView.device = defaultDevice
 
-        guard let newRenderer = Renderer(metalKitView: mtkView) else {
+        guard let cartridge = try? Emulator().loadRom("Tetris.gb") else { return }
+        
+        guard let bootRom = try? Emulator().loadBootRom("dmg_boot.bin") else { return }
+
+        guard let newRenderer = Renderer(
+            metalKitView: mtkView,
+            cartridge: cartridge,
+            bootRom: bootRom
+        ) else {
             print("Renderer cannot be initialized")
             return
         }
 
         renderer = newRenderer
 
+        renderer.emulatorRun()
+        
         renderer.mtkView(mtkView, drawableSizeWillChange: mtkView.drawableSize)
 
         mtkView.delegate = renderer

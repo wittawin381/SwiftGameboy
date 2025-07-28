@@ -16,11 +16,28 @@ struct Cartridge {
         self.memoryBankController = memoryBankController
     }
     
+    init(data: [UInt8]) throws {
+        self.data = data
+        let cartridgeType = data[0x147]
+        let romSize = data[0x148]
+        let ramSize = data[0x149]
+        
+        switch cartridgeType {
+        case 0x00:
+            self.memoryBankController = MBCVersion1(
+                romSize: romSize,
+                ramSize: ramSize
+            )
+        default:
+            fatalError("MBC type \(cartridgeType) not supported")
+        }
+    }
+    
     mutating func write(_ value: UInt8, at address: UInt16) {
         memoryBankController.write(value, at: address)
     }
     
-    mutating func readValue(at address: UInt16) -> UInt8 {
+    func readValue(at address: UInt16) -> UInt8 {
         let mappedAddress = memoryBankController.readAddress(for: address)
         return data[Int(mappedAddress)]
     }

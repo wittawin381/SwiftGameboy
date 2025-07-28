@@ -3,4 +3,288 @@
    uuid = "F00FCA5C-AF42-4DAA-AE2E-BF71ED0D0D89"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "6DC575F5-24AC-456D-830E-B98672B2A3E0"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Gameboy Shared/Renderer.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "134"
+            endingLineNumber = "134"
+            landmarkName = "draw(in:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "7E019584-E682-409B-930C-BE7F4AACD8D5"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Gameboy macOS/GameViewController.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "37"
+            endingLineNumber = "37"
+            landmarkName = "viewDidLoad()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F4494E83-6F32-4561-BCDD-C39DE55CF84A"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Gameboy Shared/Emulator/PPU/PPU.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "44"
+            endingLineNumber = "44"
+            landmarkName = "write(_:at:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B808365C-63CE-4B27-A31A-444BE6FC7E7F"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Gameboy Shared/Emulator/Instructions/Instruction.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1191"
+            endingLineNumber = "1191"
+            landmarkName = "InstructionBuilder"
+            landmarkType = "21">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "78F018AF-CA78-4E0F-856A-88431896E2ED"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Gameboy Shared/Emulator/Instructions/Instruction.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "2270"
+            endingLineNumber = "2270"
+            landmarkName = "prefixInstruction"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B609496C-B6EC-48C5-9B63-51BBCB7104F8"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Gameboy Shared/Emulator/Instructions/Instruction.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1984"
+            endingLineNumber = "1984"
+            landmarkName = "prefixInstruction"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "EEC5B1AD-56D1-4EB8-A72B-8267E49D400C"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Gameboy Shared/Emulator/Instructions/Instruction.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1275"
+            endingLineNumber = "1275"
+            landmarkName = "InstructionBuilder"
+            landmarkType = "21">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "FD523B9E-DF33-4494-9542-C874DF79A91B"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Gameboy Shared/Emulator/Instructions/Instruction.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "389"
+            endingLineNumber = "389"
+            landmarkName = "InstructionBuilder"
+            landmarkType = "21">
+            <Locations>
+               <Location
+                  uuid = "FD523B9E-DF33-4494-9542-C874DF79A91B - 8a70951c3c71c733"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #48 (inout Gameboy.CPU, (Swift.UInt16) -&gt; Swift.UInt8, (Swift.UInt8, Swift.UInt16) -&gt; ()) -&gt; Gameboy.Instruction in variable initialization expression of static Gameboy.InstructionBuilder.instructions : Swift.Dictionary&lt;Swift.UInt8, Gameboy.InstructionBuilder&gt;"
+                  moduleName = "Gameboy.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/wittawinmuangnoi/Documents/T-app/Gameboy/Gameboy%20Shared/Emulator/Instructions/Instruction.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "389"
+                  endingLineNumber = "389">
+               </Location>
+               <Location
+                  uuid = "FD523B9E-DF33-4494-9542-C874DF79A91B - 2f24823194fc4e89"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (inout Gameboy.CPU, (Swift.UInt16) -&gt; Swift.UInt8, (Swift.UInt8, Swift.UInt16) -&gt; ()) -&gt; () in closure #48 (inout Gameboy.CPU, (Swift.UInt16) -&gt; Swift.UInt8, (Swift.UInt8, Swift.UInt16) -&gt; ()) -&gt; Gameboy.Instruction in variable initialization expression of static Gameboy.InstructionBuilder.instructions : Swift.Dictionary&lt;Swift.UInt8, Gameboy.InstructionBuilder&gt;"
+                  moduleName = "Gameboy.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/wittawinmuangnoi/Documents/T-app/Gameboy/Gameboy%20Shared/Emulator/Instructions/Instruction.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "390"
+                  endingLineNumber = "390">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "6AD7CCB8-8B79-4430-B615-5BCC07DE0002"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Gameboy Shared/Emulator/Instructions/Instruction.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "382"
+            endingLineNumber = "382"
+            landmarkName = "InstructionBuilder"
+            landmarkType = "21">
+            <Locations>
+               <Location
+                  uuid = "6AD7CCB8-8B79-4430-B615-5BCC07DE0002 - 8a70951c3c71c61a"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #48 (inout Gameboy.CPU, (Swift.UInt16) -&gt; Swift.UInt8, (Swift.UInt8, Swift.UInt16) -&gt; ()) -&gt; Gameboy.Instruction in variable initialization expression of static Gameboy.InstructionBuilder.instructions : Swift.Dictionary&lt;Swift.UInt8, Gameboy.InstructionBuilder&gt;"
+                  moduleName = "Gameboy.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/wittawinmuangnoi/Documents/T-app/Gameboy/Gameboy%20Shared/Emulator/Instructions/Instruction.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "382"
+                  endingLineNumber = "382">
+               </Location>
+               <Location
+                  uuid = "6AD7CCB8-8B79-4430-B615-5BCC07DE0002 - b17a03ad267be061"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (inout Gameboy.CPU, (Swift.UInt16) -&gt; Swift.UInt8, (Swift.UInt8, Swift.UInt16) -&gt; ()) -&gt; () in closure #48 (inout Gameboy.CPU, (Swift.UInt16) -&gt; Swift.UInt8, (Swift.UInt8, Swift.UInt16) -&gt; ()) -&gt; Gameboy.Instruction in variable initialization expression of static Gameboy.InstructionBuilder.instructions : Swift.Dictionary&lt;Swift.UInt8, Gameboy.InstructionBuilder&gt;"
+                  moduleName = "Gameboy.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/wittawinmuangnoi/Documents/T-app/Gameboy/Gameboy%20Shared/Emulator/Instructions/Instruction.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "383"
+                  endingLineNumber = "383">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "06CC7885-BD2A-4C1B-8089-7C23E985D0C0"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Gameboy Shared/Emulator/Instructions/Instruction.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "263"
+            endingLineNumber = "263"
+            landmarkName = "InstructionBuilder"
+            landmarkType = "21">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "6EBDB147-B76E-4495-B7F0-5DF30617D26C"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Gameboy Shared/Emulator/Instructions/Instruction.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "271"
+            endingLineNumber = "271"
+            landmarkName = "InstructionBuilder"
+            landmarkType = "21">
+            <Locations>
+               <Location
+                  uuid = "6EBDB147-B76E-4495-B7F0-5DF30617D26C - 28a68b4ca4bf047a"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #32 (inout Gameboy.CPU, (Swift.UInt16) -&gt; Swift.UInt8, (Swift.UInt8, Swift.UInt16) -&gt; ()) -&gt; Gameboy.Instruction in variable initialization expression of static Gameboy.InstructionBuilder.instructions : Swift.Dictionary&lt;Swift.UInt8, Gameboy.InstructionBuilder&gt;"
+                  moduleName = "Gameboy.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/wittawinmuangnoi/Documents/T-app/Gameboy/Gameboy%20Shared/Emulator/Instructions/Instruction.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "271"
+                  endingLineNumber = "271">
+               </Location>
+               <Location
+                  uuid = "6EBDB147-B76E-4495-B7F0-5DF30617D26C - 2f24823194fc41df"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (inout Gameboy.CPU, (Swift.UInt16) -&gt; Swift.UInt8, (Swift.UInt8, Swift.UInt16) -&gt; ()) -&gt; () in closure #32 (inout Gameboy.CPU, (Swift.UInt16) -&gt; Swift.UInt8, (Swift.UInt8, Swift.UInt16) -&gt; ()) -&gt; Gameboy.Instruction in variable initialization expression of static Gameboy.InstructionBuilder.instructions : Swift.Dictionary&lt;Swift.UInt8, Gameboy.InstructionBuilder&gt;"
+                  moduleName = "Gameboy.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/wittawinmuangnoi/Documents/T-app/Gameboy/Gameboy%20Shared/Emulator/Instructions/Instruction.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "272"
+                  endingLineNumber = "272">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "974B0CF4-B08F-42B2-B709-18270A38D307"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Gameboy Shared/Emulator/Instructions/Instruction.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1656"
+            endingLineNumber = "1656"
+            landmarkName = "InstructionBuilder"
+            landmarkType = "21">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

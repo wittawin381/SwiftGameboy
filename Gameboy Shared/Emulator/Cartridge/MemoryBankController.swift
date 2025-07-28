@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import UIKit
 
 protocol MemoryBankController {
     var romSize: UInt8 { get }
