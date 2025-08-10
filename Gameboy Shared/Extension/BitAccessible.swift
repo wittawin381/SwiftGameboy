@@ -12,11 +12,27 @@ protocol BitAccessible {
 }
 
 extension BitAccessible where Self: FixedWidthInteger {
-func bit(_ index: UInt8) -> Bool {
+    func bit(_ index: UInt8) -> Bool {
         (self >> index) & 0x1 == 1
     }
 }
 
-extension UInt8: BitAccessible {}
+//extension UInt8: BitAccessible {}
 
-extension UInt16: BitAccessible {}
+extension UInt8 {
+    func bit(_ index: UInt8) -> Bool {
+        (self >> index) & 0x1 == 1
+    }
+    
+    func bit(_ index: Int) -> Bool {
+        (self >> index) & 0x1 == 1
+    }
+}
+
+extension UInt16 {
+    func bit(_ index: UInt8) -> Bool {
+        (self >> index) & 0x1 == 1
+    }
+}
+
+//extension UInt16: BitAccessible {}

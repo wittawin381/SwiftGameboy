@@ -21,6 +21,7 @@ class GameViewController: NSViewController {
             print("View attached to GameViewController is not an MTKView")
             return
         }
+        mtkView.preferredFramesPerSecond = 60
 
         // Select the device to render with.  We choose the default device
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {

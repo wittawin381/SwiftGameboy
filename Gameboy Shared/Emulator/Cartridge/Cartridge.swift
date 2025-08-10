@@ -19,11 +19,11 @@ struct Cartridge {
     init(data: [UInt8]) throws {
         self.data = data
         let cartridgeType = data[0x147]
-        let romSize = data[0x148]
+        let romSize = (1 << data[0x148]) * 32 * 1024
         let ramSize = data[0x149]
         
         switch cartridgeType {
-        case 0x00:
+        case 0x00, 0x01:
             self.memoryBankController = MBCVersion1(
                 romSize: romSize,
                 ramSize: ramSize

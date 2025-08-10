@@ -8,7 +8,7 @@
 import Foundation
 
 protocol MemoryBankController {
-    var romSize: UInt8 { get }
+    var romSize: Int { get }
     var ramSize: UInt8 { get }
     
     /// ram bank register is actually 2 bit register
@@ -24,7 +24,7 @@ protocol MemoryBankController {
 }
 
 struct MBCVersion1: MemoryBankController {
-    let romSize: UInt8
+    let romSize: Int
     let ramSize: UInt8
     
     var additionalRegister: UInt8 = 0
@@ -32,8 +32,8 @@ struct MBCVersion1: MemoryBankController {
     var romBankNumberRegister: UInt8 = 0
     var ramEnabled: Bool = false
     
-    let romBankOffset: UInt16 = 0x3FFF
-    let ramBankOffset: UInt16 = 0x1FFF
+    let romBankOffset: UInt16 = 0x4000
+    let ramBankOffset: UInt16 = 0x2000
     
     enum BankingMode: Int {
         case simple
@@ -55,7 +55,7 @@ struct MBCVersion1: MemoryBankController {
         case 0x4000...0x7FFF:
             let adjustedRomBankNumber = romBankNumberRegister == 0 ? 1 : romBankNumberRegister
             let combinedRomBankNumber = (UInt16(additionalRegister) << 5) | UInt16(adjustedRomBankNumber)
-            let memoryAddress = (combinedRomBankNumber * romBankOffset) + address
+            let memoryAddress = (combinedRomBankNumber * romBankOffset) + address - 0x4000
             return memoryAddress
         /// RAM bank
         case 0xA000...0xBFFF:
@@ -83,7 +83,7 @@ struct MBCVersion1: MemoryBankController {
                 romBankValue += 1
             }
             if romBankValue > romSize / 16 {
-                romBankValue &= (romSize / 16)
+                romBankValue &= UInt8((romSize / 16))
             }
             return romBankNumberRegister = romBankValue
         case 0x4000...0x5FFF:

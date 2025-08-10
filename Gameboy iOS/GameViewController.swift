@@ -31,12 +31,22 @@ class GameViewController: UIViewController {
         mtkView.device = defaultDevice
         mtkView.backgroundColor = UIColor.black
         
-        guard let cartridge = try? Emulator().loadRom("Tetris.gb") else { return }
+        guard let cartridge = try? Emulator().loadRom("cpu_instrs.gb") else { return }
+        
+        guard let bootRom = try? Emulator().loadBootRom("dmg_boot.bin") else { return }
 
-        guard let newRenderer = Renderer(metalKitView: mtkView, cartridge: cartridge) else {
+        guard let newRenderer = Renderer(
+            metalKitView: mtkView,
+            cartridge: cartridge,
+            bootRom: bootRom
+        ) else {
             print("Renderer cannot be initialized")
             return
         }
+
+        renderer = newRenderer
+
+        renderer.emulatorRun()
 
         renderer = newRenderer
 

@@ -33,8 +33,8 @@ struct Device {
         self.bootRom = bootRom
     }
     
-    mutating func run() -> [[PixelData]] {
-        cpu.update { address in
+    mutating func run() -> PictureProcessingUnit.AdvanceAction {
+        cpu.update { [cpu] address in
             switch address {
             case 0x0...0x7FFF:
                 if ioRegisters.bootSuccess {
@@ -57,11 +57,11 @@ struct Device {
             case 0xFE00...0xFE9F:
                 return objectAttributeMemory[address, offset: 0xFE00]
             case 0xFF00...0xFF7F:
-                return ioRegisters.readValue(at: address - 0xFF00)
+                return ioRegisters.readValue(at: address)
             case 0xFF80...0xFFFE:
                 return hRam[address, offset: 0xFF80]
             case 0xFFFF:
-                return cpu.interrupt.value
+                return cpu.instructionRegister
             default: return 0xFF
             }
             
@@ -71,6 +71,13 @@ struct Device {
             case 0x0...0x7FFF:
                 return cartridge.memoryBankController.write(value, at: address)
             case 0x8000...0x9FFF:
+                
+                if address >= 0x9800, address <= 0x9BFF {
+                    print("HEE")
+                    if address == 0x9800, value != 0 {
+                        print("DD")
+                    }
+                }
                 return vRam[address, offset: 0x8000] = value
             case 0xA000...0xBFFF:
                 return cartridge.memoryBankController.write(value, at: address)
@@ -79,13 +86,18 @@ struct Device {
             case 0xFE00...0xFE9F:
                 return objectAttributeMemory[address, offset: 0xFE00] = value
             case 0xFF00...0xFF7F:
-                return ioRegisters.write(value, at: address - 0xFF00)
+                return ioRegisters.write(value, at: address)
             case 0xFF80...0xFFFE:
                 return hRam[address, offset: 0xFF80] = value
             // TODO: - implement other space of ram
             default: break
             }
         }
-        return ioRegisters.ppu.render(vRam: vRam)
+        
+        return ioRegisters.ppu.advance(
+            vRam: vRam,
+            interruptRequestHandler: { type in
+                
+            })
     }
 }

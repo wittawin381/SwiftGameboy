@@ -10,7 +10,7 @@ import Foundation
 struct IORegisters {
     var bootSuccess: Bool = false
     var ppu: PictureProcessingUnit = PictureProcessingUnit()
-    var interrupts: InterruptRegister
+    var interrupts: InterruptRegister = InterruptRegister(value: 0x0)
     
     mutating func write(_ value: UInt8, at address: UInt16) {
         switch address {

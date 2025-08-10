@@ -6,9 +6,19 @@
 //
 
 import Foundation
+import DequeModule
 
-struct PictureProcessingUnit {
-    typealias InterruptRequestHandler = () -> Void
+struct PictureProcessingUnit  {
+    enum InterruptType {
+        case stat
+        case vBlank
+    }
+    
+    typealias InterruptRequestHandler = (InterruptType) -> Void
+    typealias DrawHandler = (FrameBuffer) -> Void
+    
+    /// dot cycle : 1 cycle = one of 4 MHz cpu cycle 4 dots = 1 M cycle
+    var cycleCounter: UInt16 = 0
     
     /// 0xFF40
     var lcdControl: LCDControl = .init(0)
@@ -34,11 +44,25 @@ struct PictureProcessingUnit {
     
     /// 0xFF47  color shade of each color ID
     /// the color is depend on you
-    var backgroundPalette: UInt8 = 0
+    var backgroundPalette: ColorPaletteRegister = .init(value: 0x0)
     /// same as backgroundPalette ( the lower two bit is ignored because color 0 = transparent  in spiret )
-    var spritePalette0: UInt8 = 0
+    var spritePalette0: ColorPaletteRegister = .init(value: 0x0)
     /// same as backgroundPalette  ( the lower two bit is ignored because color 0 = transparent  in spiret )
-    var spritePalette1: UInt8 = 0
+    var spritePalette1: ColorPaletteRegister = .init(value: 0x0)
+    
+    var frameBuffer = FrameBuffer()
+    
+    var backgroundFIFO: Deque<UInt8> = []
+    var pixelFetcher: PixelFetcher.ScanlineState?
+    var windowInternalXCounter: UInt8 = 0
+    var windowInternalLineCounter: UInt8 = 0
+    var windowYCondition: Bool = false
+    var windowXCondition: Bool = false
+    var isWindowDisplayOnScanline: Bool {
+        windowXCondition && windowYCondition && lcdControl.windowEnabled
+    }
+    var pixelX: UInt8 = 0
+    var pixelY: UInt8 = 0
     
     // TODO: - add support for CGB
     
@@ -47,19 +71,29 @@ struct PictureProcessingUnit {
         case 0xFF40:
             lcdControl = .init(value)
         case 0xFF41:
-            lcdStatus.value = value
+//            if value & 0b0000_0111 != lcdStatus.value & 0b0000_0111 {
+//                fatalError("ppuMode and LCY == LY is Read only")
+//            }
+            lcdStatus.value = value & 0b1111_1100 | lcdStatus.value & 0b0000_0011
+//            lcdStatus.value = value
         case 0xFF42:
             scy = value
         case 0xFF43:
             scx = value
         case 0xFF44:
-            lcdY = value & 0x99
+            fatalError("LY is Read Only")
         case 0xFF45:
             lcdYCompare = value & 0x99
+        case 0xFF47:
+            backgroundPalette = ColorPaletteRegister(value: value)
+        case 0xFF48:
+            spritePalette0 = ColorPaletteRegister(value: value)
+        case 0xFF49:
+            spritePalette1 = ColorPaletteRegister(value: value)
         case 0xFF4A:
-            wy = value & 0xA6
+            wy = value
         case 0xFF4B:
-            wx = value & 0x8F
+            wx = value
         default: break
         }
     }
@@ -78,6 +112,12 @@ struct PictureProcessingUnit {
             lcdY
         case 0xFF45:
             lcdYCompare
+        case 0xFF47:
+            backgroundPalette.value
+        case 0xFF48:
+            spritePalette0.value
+        case 0xFF49:
+            spritePalette1.value
         case 0xFF4A:
             wy
         case 0xFF4B:
@@ -86,123 +126,147 @@ struct PictureProcessingUnit {
         }
     }
     
-    func updateTick(vRam: [UInt8], interruptRequestHandler: InterruptRequestHandler) -> [[PixelData]] {
-        
-        
-        
-        return []
+    enum AdvanceAction {
+        case idle
+        case drawFrame(FrameBuffer)
     }
     
-    private func handleLCDStatusInterrupt(interruptRequestHandler: InterruptRequestHandler) {
+    mutating func advance(
+        vRam: [UInt8],
+        interruptRequestHandler: InterruptRequestHandler,
+    ) -> AdvanceAction {
+        if !lcdControl.lcdDisplayEnabled { return .idle }
+        cycleCounter &+= 1
+        
+        handleLCDStatusInterrupt(interruptRequestHandler)
+        
+        switch lcdStatus.ppuMode {
+        case 2:
+            if cycleCounter == 80 {
+                if !windowYCondition {
+                    windowYCondition = wy == lcdY
+                }
+                pixelFetcher = PixelFetcher.makeScanlineFetcher()
+                
+                self.lcdStatus.ppuMode = 3
+            }
+            return .idle
+        case 3:
+            if backgroundFIFO.count > 8 {
+                if pixelX == 0 {
+                    let scroll = scx % 8
+                    if scroll != 0 {
+                        backgroundFIFO.removeFirst(Int(scroll))
+                    }
+                }
+            }
+            if backgroundFIFO.count > 8, let firstPixel = backgroundFIFO.popFirst() {
+                frameBuffer.value[Int(pixelY) * 160 + Int(pixelX)] = firstPixel
+                pixelX += 1
+            }
+            
+            if pixelX > 159 {
+                pixelX = 0
+                pixelY += 1
+                backgroundFIFO = []
+                windowXCondition = false
+                self.lcdStatus.ppuMode = 0
+                return .idle
+            }
+            
+            if pixelX >= wx, !windowXCondition {
+                windowXCondition = true
+                windowInternalLineCounter += 1
+            }
+            
+            guard var pixelFetcher else { return .idle }
+            
+            let action = pixelFetcher.advance { [self] position in
+                if isWindowDisplayOnScanline {
+                    return (
+                        position: PixelFetcher.ScanlineState.Position(
+                            x: UInt16(windowInternalXCounter),
+                            y: UInt16(windowInternalLineCounter)
+                        ),
+                        tileMapArea: isWindowDisplayOnScanline ? lcdControl.windowTileMapArea : lcdControl.backgroundTileMapArea,
+                        tileDataArea: lcdControl.tileDataArea,
+                        vRamProvider: { vRam }
+                    )
+                } else {
+                    return (
+                        position: PixelFetcher.ScanlineState.Position(
+                            x: UInt16((UInt16(scx) / 8) + position.x) & 0x1F,
+                            y: (UInt16(lcdY &+ scy) & 0xFF)
+                        ),
+                        tileMapArea: isWindowDisplayOnScanline ? lcdControl.windowTileMapArea : lcdControl.backgroundTileMapArea,
+                        tileDataArea: lcdControl.tileDataArea,
+                        vRamProvider: { vRam }
+                    )
+                }
+            }
+            self.pixelFetcher = pixelFetcher
+            
+            switch action {
+            case .idle:
+                break;
+            case .incrementXCounter:
+                if isWindowDisplayOnScanline {
+                    windowInternalXCounter += 1
+                }
+                break
+            case let .pushPixelRow(pixels):
+                if backgroundFIFO.count <= 8 {
+                    backgroundFIFO.append(contentsOf: pixels)
+                }
+            }
+            
+            
+            
+            return .idle
+        case 0:
+            if cycleCounter == 456 {
+                cycleCounter = 0
+                lcdY += 1
+                if lcdY == 144 {
+                    lcdStatus.ppuMode = 1
+                } else {
+                    lcdStatus.ppuMode = 2
+                }
+            }
+            return .idle
+        case 1:
+            if cycleCounter == 456 {
+                cycleCounter = 0
+                lcdY += 1
+            }
+            if lcdY > 153 {
+                windowXCondition = false
+                windowYCondition = false
+                backgroundFIFO = []
+                windowInternalXCounter = 0
+                windowInternalLineCounter = 0
+                lcdY = 0
+                lcdStatus.ppuMode = 2
+                pixelX = 0
+                pixelY = 0
+                return .drawFrame(frameBuffer)
+            }
+        default: return .idle
+        }
+        
+        return .idle
+    }
+    
+    private func handleLCDStatusInterrupt(_ interruptRequestHandler: InterruptRequestHandler) {
         if lcdStatus.mode0, lcdStatus.ppuMode == 0 {
-            return interruptRequestHandler()
+            return interruptRequestHandler(.stat)
         } else if lcdStatus.mode1, lcdStatus.ppuMode == 1 {
-            return interruptRequestHandler()
+            return interruptRequestHandler(.stat)
         } else if lcdStatus.mode2, lcdStatus.ppuMode == 2 {
-            return interruptRequestHandler()
+            return interruptRequestHandler(.stat)
         } else if lcdStatus.lcdYCompare, lcdStatus.lcdYCompareEqual {
-            return interruptRequestHandler()
+            return interruptRequestHandler(.stat)
         }
-    }
-    
-    private func scanline(_ line: UInt8, vRam: [UInt8]) -> [PixelData] {
-        return (0..<160).map { (xPosition: UInt8) in
-            let backgroundOrWindowPixel = if lcdControl.windowEnabled, line >= wx, xPosition >= wy - 7 {
-                fetchWindowPixel(
-                    atLine: line,
-                    fromVram: vRam,
-                    fetcherX: xPosition,
-                    windowX: wx,
-                    windowY: wy
-                )
-            } else {
-                fetchBackgroundPixel(
-                    atLine: line,
-                    fromVram: vRam,
-                    fetcherX: xPosition,
-                    scx: scx,
-                    scy: scy
-                )
-            }
-            
-            let spritePixel = fetchSpritePixel(atLine: line, fromVram: vRam, fetcherX: xPosition)
-            
-            if let spritePixel, spritePixel.backgroundPriority == 0 {
-                return spritePixel
-            }
-            return backgroundOrWindowPixel
-        }
-    }
-    
-    private func fetchWindowPixel(atLine line: UInt8, fromVram vRam: [UInt8], fetcherX: UInt8, windowX: UInt8, windowY: UInt8) -> PixelData {
-        let tileMapAreaAddress: UInt16 = if lcdControl.windowTileMapArea == 1 {
-            0x9C00
-        } else {
-            0x9800
-        }
-        let tileNumber = vRam[Int(tileMapAreaAddress + UInt16(windowX) + ((UInt16(windowY) / 8) * 32) + UInt16(fetcherX)) - 0x8000]
-        
-        let usingUnsignedAddressing = lcdControl.tileDataArea == 1
-        let tileDataAreaAddress: UInt16 = if usingUnsignedAddressing {
-            0x8000
-        } else {
-            0x8800
-        }
-        let tileDataAddress: UInt16 = if usingUnsignedAddressing {
-            tileDataAreaAddress + (UInt16(tileNumber) * 16)
-        } else {
-            tileDataAreaAddress + UInt16(Int16(Int8(bitPattern: tileNumber)) + 128) * 16
-        }
-        
-        let tileYPosition = (windowY % 8) * 2
-        let tileDataLow = vRam[Int(tileDataAddress) + Int(tileYPosition) - 0x8000]
-        let tileDataHigh = vRam[Int(tileDataAddress) + 1 + Int(tileYPosition) - 0x8000]
-
-        let pixelIndexAtTile = windowX % 8
-        let pixelDataLow = tileDataLow.bit(pixelIndexAtTile).toUInt8()
-        let pixelDataHigh = tileDataHigh.bit(pixelIndexAtTile).toUInt8()
-        
-        return PixelData(color: pixelDataHigh << 1 | pixelDataLow,
-                         palette: 0,
-                         spritePrioriy: 0,
-                         backgroundPriority: 0)
-    }
-    
-    private func fetchBackgroundPixel(atLine line: UInt8, fromVram vRam: [UInt8], fetcherX: UInt8, scx: UInt8, scy: UInt8) -> PixelData {
-        let tileMapAreaAddress: UInt16 = if lcdControl.backgroundTileMapArea == 1 {
-            0x9C00
-        } else {
-            0x9800
-        }
-        
-        let xOffset: UInt16 = (UInt16(fetcherX) + (UInt16(scx) / 8)) & 0x1F
-        let yOffset: UInt16 = (((UInt16(line) + UInt16(scy)) & 0xFF) / 8) * 32
-        let tileNumber = vRam[Int(tileMapAreaAddress + yOffset + xOffset) - 0x8000]
-        
-        let usingUnsignedAddressing = lcdControl.tileDataArea == 1
-        let tileDataAreaAddress: UInt16 = if usingUnsignedAddressing {
-            0x8000
-        } else {
-            0x8800
-        }
-        let tileDataAddress: UInt16 = if usingUnsignedAddressing {
-            tileDataAreaAddress + (UInt16(tileNumber) * 16)
-        } else {
-            tileDataAreaAddress + UInt16(Int16(Int8(bitPattern: tileNumber)) + 128) * 16
-        }
-        
-        let tileYPosition = ((line + scy) % 8) * 2
-        let tileDataLow = vRam[Int(tileDataAddress) + Int(tileYPosition) - 0x8000]
-        let tileDataHigh = vRam[Int(tileDataAddress) + 1 + Int(tileYPosition) - 0x8000]
-
-        let pixelIndexAtTile = scx % 8
-        let pixelDataLow = tileDataLow.bit(pixelIndexAtTile).toUInt8()
-        let pixelDataHigh = tileDataHigh.bit(pixelIndexAtTile).toUInt8()
-        
-        return PixelData(color: pixelDataHigh << 1 | pixelDataLow,
-                         palette: 0,
-                         spritePrioriy: 0,
-                         backgroundPriority: 0)
     }
     
     private func fetchSpritePixel(atLine line: UInt8, fromVram vRam: [UInt8], fetcherX: UInt8) -> PixelData? {
@@ -239,10 +303,10 @@ struct PictureProcessingUnit {
         var currentAddress: UInt16 = 0xFE00
         var buffer: [Sprite] = []
         while buffer.count <= 10, currentAddress <= 0xFE9F {
-            let yPosition = vRam[Int(currentAddress) - 0xFE00]
-            let xPosition = vRam[Int(currentAddress) + 1 - 0xFE00]
-            let tileNumber = vRam[Int(currentAddress) + 2 - 0xFE00]
-            let attributes = vRam[Int(currentAddress) + 3 - 0xFE00]
+            let yPosition = vRam[currentAddress, offset: 0xFE00]
+            let xPosition = vRam[currentAddress + 1, offset: 0xFE00]
+            let tileNumber = vRam[currentAddress + 2, offset: 0xFE00]
+            let attributes = vRam[currentAddress + 3, offset: 0xFE00]
             let spriteHeight: UInt8 = if lcdControl.spriteSize == 0 { 8 } else { 16 }
             
             if xPosition > 0,
@@ -269,37 +333,39 @@ extension PictureProcessingUnit {
         let value: UInt8
         /// Bit 7 - set display enable
         
-        var lcdDisplayEnabled: Bool {
-            ((value & 0b10000000) >> 7) == 1
-        }
+        var lcdDisplayEnabled: Bool { value.bit(7) }
         /// Bit 6 - window tile map area 0 = 9800 - 9BFF, 1 = 9C00 – 9FFF
-        var windowTileMapArea: Int {
-            Int((value & 0b01000000) >> 6)
+        var windowTileMapArea: UInt16 {
+            if value.bit(6) {
+                return 0x9C00
+            } else {
+                return 0x9800
+            }
         }
         /// Bit 5 - set this to false hide window layer entirely
-        var windowEnabled: Bool {
-            ((value & 0b00100000) >> 5) == 1
-        }
+        var windowEnabled: Bool { value.bit(5) }
         /// Bit 4 - tile data area 0 = 8800 – 97FF, 1 = 8000 – 8FFF
-        var tileDataArea: Int {
-            Int((value & 0b00010000) >> 4)
+        var tileDataArea: UInt16 {
+            if value.bit(4) {
+                return 0x8000
+            } else {
+                return 0x8800
+            }
         }
         /// Bit 3 - background tile map area 0 = 9800 – 9BFF, 1 = 9C00 – 9FFF
-        var backgroundTileMapArea: Int {
-            Int((value & 0b00001000) >> 3)
+        var backgroundTileMapArea: UInt16 {
+            if value.bit(3) {
+                0x9C00
+            } else {
+                0x9800
+            }
         }
         /// Bit 2 - sprite size 0 = 8x8 1 = 8x16
-        var spriteSize: Int {
-            Int((value & 0b00000100) >> 2)
-        }
+        var spriteSize: UInt8 { value.bit(2).toUInt8() }
         /// Bit 1 - if 0 sprite is not drawn on screen
-        var spriteEnabled: Bool {
-            ((value & 0b00000010) >> 1) == 1
-        }
+        var spriteEnabled: Bool { value.bit(1) }
         /// Bit 0 - if false background and window layer are not drawn
-        var backgroundAndWindowEnalbed: Bool {
-            (value & 0b00000001) == 1
-        }
+        var backgroundAndWindowEnalbed: Bool { value.bit(0) }
         
         init(_ value: UInt8) {
             self.value = value
@@ -385,5 +451,183 @@ extension PictureProcessingUnit {
             self.value.setBit(at: index, to: value.toUInt8())
         }
     }
+    
+    struct ColorPaletteRegister {
+        let value: UInt8
+        
+        var id0: UInt8 {
+            value & 0b0000_0011
+        }
+        
+        var id1: UInt8 {
+            (value & 0b0000_1100) >> 2
+        }
+        
+        var id2: UInt8 {
+            (value & 0b0011_0000) >> 4
+        }
+        
+        var id4: UInt8 {
+            (value & 0b1100_0000) >> 6
+        }
+    }
 }
 
+class Ref<Value> {
+    var value: Value
+    
+    init(_ value: Value) {
+        self.value = value
+    }
+}
+
+struct FrameBuffer {
+    var ref: Ref<UnsafeMutablePointer<UInt8>>
+    
+    init() {
+        let pixels = UnsafeMutablePointer<UInt8>.allocate(capacity: 160 * 144)
+        pixels.update(repeating: 0, count: 160 * 144)
+        ref = Ref(pixels)
+    }
+    
+    var value: UnsafeMutablePointer<UInt8> {
+        get { ref.value }
+        set {
+            if !isKnownUniquelyReferenced(&ref) {
+                ref = Ref(newValue)
+            }
+            ref.value = newValue
+        }
+    }
+}
+
+
+enum PixelFetcher {
+    static func makeScanlineFetcher() -> ScanlineState {
+        ScanlineState(
+            state: .fetchTileNumber(
+                cycleCounter: 0
+            )
+        )
+    }
+    
+    struct ScanlineState {
+        var x: UInt16 = 0
+        /// 0 - 255
+        var y: UInt16 = 0
+        
+        var state: State
+        
+        struct Position {
+            let x: UInt16
+            let y: UInt16
+        }
+        
+        enum State {
+            case fetchTileNumber(
+                cycleCounter: Int
+            )
+            
+            case fetchTileData(
+                vRamProvider: () -> [UInt8],
+                tileDataArea: UInt16,
+                pixelPosition: Position,
+                tileNumber: UInt8,
+                usingUnsignedAddressing: Bool,
+                cycleCounter: Int
+            )
+            
+            case idle(pixels: [UInt8], cycleCounter: Int)
+        }
+        
+        enum AdvanceAction {
+            case idle
+            case incrementXCounter
+            case pushPixelRow([UInt8])
+        }
+        
+        mutating func advance(delegate: (Position) -> (position: Position, tileMapArea: UInt16, tileDataArea: UInt16, vRamProvider: () -> [UInt8])) -> AdvanceAction {
+            switch state {
+            case let .fetchTileNumber(
+                cycleCounter
+            ):
+                if cycleCounter < 1 {
+                    self.state = .fetchTileNumber(
+                        cycleCounter: cycleCounter + 1
+                    )
+                    return .idle
+                }
+                let configuration = delegate(Position(x: x, y: y))
+                let vRamProvider = configuration.vRamProvider
+                let position = configuration.position
+                let tileMapArea = configuration.tileMapArea
+                let tileDataArea = configuration.tileDataArea
+                let vRam = vRamProvider()
+                let tileNumber = vRam[(tileMapArea + position.x + (32 * (position.y / 8)) & 0x3FF) - 0x8000]
+                
+                let usingUnsignedAddressing = tileDataArea == 0x8000
+                
+                self.state = .fetchTileData(
+                    vRamProvider: vRamProvider,
+                    tileDataArea: tileDataArea,
+                    pixelPosition: position,
+                    tileNumber: tileNumber,
+                    usingUnsignedAddressing: usingUnsignedAddressing,
+                    cycleCounter: 0
+                )
+                return .idle
+            case let .fetchTileData(
+                vRamProvider,
+                tileDataArea,
+                pixelPosition,
+                tileNumber,
+                usingUnsignedAddressing,
+                cycleCounter
+            ):
+                if cycleCounter < 3 {
+                    self.state = .fetchTileData(
+                        vRamProvider: vRamProvider,
+                        tileDataArea: tileDataArea,
+                        pixelPosition: pixelPosition,
+                        tileNumber: tileNumber,
+                        usingUnsignedAddressing: usingUnsignedAddressing,
+                        cycleCounter: cycleCounter + 1
+                    )
+                    return .idle
+                }
+                
+                let vRam = vRamProvider()
+                let tileDataAddress: UInt16 = if usingUnsignedAddressing {
+                    tileDataArea + (UInt16(tileNumber) * 16)
+                } else {
+                    tileDataArea + UInt16(bitPattern: Int16(Int8(bitPattern: tileNumber)) + 128) * 16
+                }
+                
+                let tileAddress = tileDataAddress + (2 * (pixelPosition.y % 8))
+                let tileDataLow = vRam[tileAddress - 0x8000]
+                let tileDataHigh = vRam[tileAddress + 1 - 0x8000]
+                
+//                let pixels  = (0..<8).map {
+//                    tileDataHigh.bit(7 - $0).toUInt8() << 1 | tileDataLow.bit(7 - $0).toUInt8()
+//                }
+                var pixels: [UInt8] = []
+                for i in 0..<8 {
+                    pixels.append((tileDataHigh.bit(7 - i).toUInt8() << 1) | tileDataLow.bit(7 - i).toUInt8())
+                }
+                
+                x += 1
+                
+                self.state = .idle(pixels: pixels, cycleCounter: 0)
+                return .incrementXCounter
+            case let .idle(pixels, cycleCounter):
+                if cycleCounter < 2 {
+                    self.state = .idle(pixels: pixels, cycleCounter: cycleCounter + 1)
+                    return .idle
+                } else {
+                    self.state = .fetchTileNumber(cycleCounter: 0)
+                }
+                return .pushPixelRow(pixels)
+            }
+        }
+    }
+}

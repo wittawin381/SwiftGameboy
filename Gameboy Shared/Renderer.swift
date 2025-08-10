@@ -20,18 +20,10 @@ enum RendererError: Error {
     case badVertexDescriptor
 }
 
-struct FrameBuffer {
-    let pixels: UnsafeMutablePointer<UInt8>
-    
-    init() {
-        pixels = .allocate(capacity: 160 * 144)
-        pixels.update(repeating: 0, count: 160 * 144)
-    }
-}
-
 class Renderer: NSObject, MTKViewDelegate {
     
     public let device: MTLDevice
+    weak var metalKitView: MTKView?
     let vertexBuffer: MTLBuffer
     let texture: MTLTexture
     let commandQueue: MTLCommandQueue
@@ -41,14 +33,27 @@ class Renderer: NSObject, MTKViewDelegate {
     var frameBuffer = FrameBuffer()
     var gameboy: Device
     
+    var frameDraw: Int = 0
+    var frameCount: Int = 0
+    var cycleCount: Int = 0
+    
     func emulatorRun() {
-        while true {
-            let pixelData = gameboy.run()
+        Task {
+            while true {
+                let action = gameboy.run()
+                switch action {
+                case .idle:
+                    break
+                case .drawFrame(let frameBuffer):
+                    self.frameBuffer = frameBuffer
+                }
+            }
         }
     }
     
     @MainActor
     init?(metalKitView: MTKView, cartridge: Cartridge, bootRom: [UInt8]) {
+        self.metalKitView = metalKitView
         self.device = metalKitView.device!
         guard let queue = self.device.makeCommandQueue() else { return nil }
         self.commandQueue = queue
@@ -120,7 +125,8 @@ class Renderer: NSObject, MTKViewDelegate {
         
         //TODO: wait = gameboy clock
 //        _ = inFlightSemaphore.wait(timeout: DispatchTime.distantFuture)
-        
+//        guard frameDraw > 0 else { return }
+//        frameDraw -= 1
         if let commandBuffer = commandQueue.makeCommandBuffer() {
             
 //            let semaphore = inFlightSemaphore
@@ -128,13 +134,13 @@ class Renderer: NSObject, MTKViewDelegate {
 //                semaphore.signal()
 //            }
             
-            print(Date.now.timeIntervalSince1970)
+//            print(Date.now.timeIntervalSince1970)
             
             
             let region = MTLRegionMake2D(0, 0, 160, 144)
             texture.replace(region: region,
                             mipmapLevel: 0,
-                            withBytes: frameBuffer.pixels,
+                            withBytes: frameBuffer.value,
                             bytesPerRow: 160 * MemoryLayout<UInt8>.size)
             
             /// Delay getting the currentRenderPassDescriptor until we absolutely need it to avoid

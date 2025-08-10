@@ -7,10 +7,10 @@
 
 import Foundation
 
-struct InterruptRegister {
-    var value: UInt8
+public struct InterruptRegister {
+    public var value: UInt8
     
-    enum Interrupt {
+    public enum Interrupt {
         case vBlank
         case lcd
         case timer

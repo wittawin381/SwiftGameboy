@@ -7,20 +7,27 @@
 
 import Foundation
 
-enum ALU {
-    struct Flag {
-        enum Value {
+public enum ALU {
+    public struct Flag {
+        public enum Value {
             case some(Bool)
             case noneAffected
         }
         
-        let zero: Value
-        let subtract: Value
-        let halfCarry: Value
-        let carry: Value
+        public let zero: Value
+        public let subtract: Value
+        public let halfCarry: Value
+        public let carry: Value
+        
+        public init(zero: Value, subtract: Value, halfCarry: Value, carry: Value) {
+            self.zero = zero
+            self.subtract = subtract
+            self.halfCarry = halfCarry
+            self.carry = carry
+        }
     }
     
-    struct Result<Value> {
+    public struct Result<Value> {
         let value: Value
         let flag: Flag
         
@@ -83,7 +90,7 @@ enum ALU {
             flag: Flag(
                 zero: .some(result == 0),
                 subtract: .some(true),
-                halfCarry: .some((value & 0x0F) < 1),
+                halfCarry: .some(result < 0x1),
                 carry: .noneAffected
             )
         )

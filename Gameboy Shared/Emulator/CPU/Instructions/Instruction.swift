@@ -7,37 +7,37 @@
 
 import Foundation
 
-typealias MemoryReadHandler = (UInt16) -> UInt8
-typealias MemoryWriteHandler = (UInt8, UInt16) -> Void
+public typealias MemoryReadHandler = (UInt16) -> UInt8
+public typealias MemoryWriteHandler = (UInt8, UInt16) -> Void
 
-struct InstructionBuilder {
+public struct InstructionBuilder {
     /// Machine cyle : 1 Machine cycle = 4 clock cycles
-    let build: (inout CPU, MemoryReadHandler, MemoryWriteHandler) -> Instruction
+    public let build: (inout CPU, MemoryReadHandler, MemoryWriteHandler) -> Instruction
     
-    init(cycles: Int, perform: @escaping (inout CPU, MemoryReadHandler, MemoryWriteHandler) -> Void) {
+    public init(cycles: Int, perform: @escaping (inout CPU, MemoryReadHandler, MemoryWriteHandler) -> Void) {
         self.build = { _, _, _ in
             Instruction(cycles: cycles, perform: perform)
         }
     }
     
-    init(perform: @escaping (inout CPU, MemoryReadHandler, MemoryWriteHandler) -> Instruction) {
+    public init(perform: @escaping (inout CPU, MemoryReadHandler, MemoryWriteHandler) -> Instruction) {
         self.build = { cpu, readMemory, writeMemory in
             perform(&cpu, readMemory, writeMemory)
         }
     }
 }
 
-struct Instruction {
-    let cycles: Int
-    let perform: (inout CPU, MemoryReadHandler, MemoryWriteHandler) -> Void
+public struct Instruction {
+    public let cycles: Int
+    public let perform: (inout CPU, MemoryReadHandler, MemoryWriteHandler) -> Void
     
-    init(cycles: Int, perform: @escaping (inout CPU, (UInt16) -> UInt8, (UInt8, UInt16) -> Void) -> Void) {
+    public init(cycles: Int, perform: @escaping (inout CPU, (UInt16) -> UInt8, (UInt8, UInt16) -> Void) -> Void) {
         self.cycles = cycles
         self.perform = perform
     }
 }
 
-extension InstructionBuilder {
+public extension InstructionBuilder {
     static let instructions: [UInt8: InstructionBuilder] = [
         // MARK: - 0x00
         /// NOP
@@ -182,7 +182,7 @@ extension InstructionBuilder {
         /// DEC r
         0x15: InstructionBuilder(cycles: 1) { cpu, readMemory, writeMemory in
             let result = ALU.decrement(cpu.registerDE.hi)
-            cpu.registerBC.hi = result.value
+            cpu.registerDE.hi = result.value
             cpu.updateFlag(result.flag)
         },
         /// LDrn Load to 8 bit register r, the data n
@@ -219,7 +219,8 @@ extension InstructionBuilder {
         },
         /// LD A, (BC) Load to the 8-bit A register, data from the absolute address specified by the 16-bit register BC.
         0x1A: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
-            cpu.registerAF.hi = readMemory(cpu.registerDE.all)
+            let value = readMemory(cpu.registerDE.all)
+            cpu.registerAF.hi = value
         },
         /// DEC rr
         0x1B: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -234,7 +235,7 @@ extension InstructionBuilder {
         /// DEC r
         0x1D: InstructionBuilder(cycles: 1) { cpu, readMemory, writeMemory in
             let result = ALU.decrement(cpu.registerDE.lo)
-            cpu.registerBC.hi = result.value
+            cpu.registerDE.lo = result.value
             cpu.updateFlag(result.flag)
         },
         /// LDrn Load to 8 bit register r, the data n
@@ -287,7 +288,7 @@ extension InstructionBuilder {
         0x22: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
             let address = cpu.registerHL.all
             writeMemory(cpu.registerAF.hi, address)
-            cpu.registerHL.all += 1
+            cpu.registerHL.all &+= 1
         },
         /// INC rr
         0x23: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -302,7 +303,7 @@ extension InstructionBuilder {
         /// DEC r
         0x25: InstructionBuilder(cycles: 1) { cpu, readMemory, writeMemory in
             let result = ALU.decrement(cpu.registerHL.hi)
-            cpu.registerBC.hi = result.value
+            cpu.registerHL.hi = result.value
             cpu.updateFlag(result.flag)
         },
         /// LDrn Load to 8 bit register r, the data n
@@ -321,7 +322,7 @@ extension InstructionBuilder {
                     let value = readMemory(cpu.programCounter)
                     cpu.programCounter += 1
                     let signedValue = Int8(bitPattern: value)
-                    cpu.programCounter += UInt16(bitPattern: Int16(signedValue))
+                    cpu.programCounter &+= UInt16(bitPattern: Int16(signedValue))
                 }
             } else {
                 return Instruction(cycles: 2) { cpu, readMemory, writeMemory in
@@ -355,7 +356,7 @@ extension InstructionBuilder {
         /// DEC r
         0x2D: InstructionBuilder(cycles: 1) { cpu, readMemory, writeMemory in
             let result = ALU.decrement(cpu.registerHL.lo)
-            cpu.registerBC.hi = result.value
+            cpu.registerHL.lo = result.value
             cpu.updateFlag(result.flag)
         },
         /// LDrn Load to 8 bit register r, the data n
@@ -383,7 +384,7 @@ extension InstructionBuilder {
                     let value = readMemory(cpu.programCounter)
                     cpu.programCounter += 1
                     let signedValue = Int8(bitPattern: value)
-                    cpu.programCounter += UInt16(bitPattern: Int16(signedValue))
+                    cpu.programCounter &+= UInt16(bitPattern: Int16(signedValue))
                 }
             } else {
                 return Instruction(cycles: 2) { cpu, readMemory, writeMemory in
@@ -1192,12 +1193,18 @@ extension InstructionBuilder {
         },
         /// CALL cc, nn
         0xC4: InstructionBuilder { cpu, readMemory, writeMemory in
+            let leastSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
+            let mostSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
             if !cpu.zeroFlag {
                 return Instruction(cycles: 6) { cpu, readMemory, writeMemory in
-                    let leastSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
-                    let mostSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
+                    
+                    cpu.stackPointer -= 1
+                    writeMemory(UInt8(cpu.programCounter >> 8), cpu.stackPointer)
+                    cpu.stackPointer -= 1
+                    writeMemory(UInt8(cpu.programCounter & 0xFF), cpu.stackPointer)
+                    
                     let address = (UInt16(mostSignificantByte) << 8) | UInt16(leastSignificantByte)
                     cpu.programCounter = address
                 }
@@ -1220,15 +1227,13 @@ extension InstructionBuilder {
             cpu.registerAF.hi = result.value
             cpu.updateFlag(result.flag)
         },
-        // RST n
+        // RST n RST 00
         0xC7: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
-            let mostSignificantByte = (cpu.programCounter >> 8) & 0xFF
-            let leastSignificantByte = cpu.programCounter & 0xFF
             cpu.stackPointer -= 1
-            writeMemory(UInt8(mostSignificantByte), cpu.stackPointer)
+            writeMemory(UInt8(cpu.programCounter >> 8), cpu.stackPointer)
             cpu.stackPointer -= 1
-            writeMemory(UInt8(leastSignificantByte), cpu.stackPointer)
-            cpu.programCounter = mostSignificantByte
+            writeMemory(UInt8(cpu.programCounter & 0xFF), cpu.stackPointer)
+            cpu.programCounter = 0x0 | 0x0
         },
         /// RET CC
         0xC8: InstructionBuilder { cpu, readMemory, writeMemory in
@@ -1270,7 +1275,7 @@ extension InstructionBuilder {
         /// PREFIX
         0xCB: InstructionBuilder { cpu, readMemory, writeMemory in
             let opcode = readMemory(cpu.programCounter)
-            print(String(format: "%llx %llx", opcode, cpu.programCounter))
+//            print(String(format: "%llx %llx", opcode, cpu.programCounter))
             cpu.programCounter += 1
             if let instruction = prefixInstruction[opcode]?.build(&cpu, readMemory, writeMemory) {
                 return instruction
@@ -1280,17 +1285,23 @@ extension InstructionBuilder {
         },
         /// CALL cc, nn
         0xCC: InstructionBuilder { cpu, readMemory, writeMemory in
+            let leastSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
+            let mostSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
             if cpu.zeroFlag {
                 return Instruction(cycles: 6) { cpu, readMemory, writeMemory in
-                    let leastSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
-                    let mostSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
+                    cpu.stackPointer -= 1
+                    writeMemory(UInt8(cpu.programCounter >> 8), cpu.stackPointer)
+                    cpu.stackPointer -= 1
+                    writeMemory(UInt8(cpu.programCounter & 0xFF), cpu.stackPointer)
+                    
                     let address = (UInt16(mostSignificantByte) << 8) | UInt16(leastSignificantByte)
                     cpu.programCounter = address
                 }
             } else {
-                return Instruction(cycles: 3) { _, _, _ in }
+                return Instruction(cycles: 3) { _, _, _ in
+                }
             }
         },
         /// CALLCALL nn
@@ -1299,10 +1310,12 @@ extension InstructionBuilder {
             cpu.programCounter += 1
             let mostSignificantByte = readMemory(cpu.programCounter)
             cpu.programCounter += 1
+            
             cpu.stackPointer -= 1
             writeMemory(UInt8(cpu.programCounter >> 8), cpu.stackPointer)
             cpu.stackPointer -= 1
             writeMemory(UInt8(cpu.programCounter & 0xFF), cpu.stackPointer)
+            
             cpu.programCounter = (UInt16(mostSignificantByte) << 8) | UInt16(leastSignificantByte)
         },
         /// ADC n
@@ -1313,15 +1326,13 @@ extension InstructionBuilder {
             cpu.registerAF.hi = result.value
             cpu.updateFlag(result.flag)
         },
-        // RST n
+        // RST n RST 0x08
         0xCF: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
-            let mostSignificantByte = (cpu.programCounter >> 8) & 0xFF
-            let leastSignificantByte = cpu.programCounter & 0xFF
             cpu.stackPointer -= 1
-            writeMemory(UInt8(mostSignificantByte), cpu.stackPointer)
+            writeMemory(UInt8(cpu.programCounter >> 8), cpu.stackPointer)
             cpu.stackPointer -= 1
-            writeMemory(UInt8(leastSignificantByte), cpu.stackPointer)
-            cpu.programCounter = (0x08 << 8) | mostSignificantByte
+            writeMemory(UInt8(cpu.programCounter & 0xFF), cpu.stackPointer)
+            cpu.programCounter = 0x08
         },
         
         // MARK: - 0xD0
@@ -1364,12 +1375,17 @@ extension InstructionBuilder {
         },
         /// CALL cc, nn
         0xD4: InstructionBuilder { cpu, readMemory, writeMemory in
+            let leastSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
+            let mostSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
             if !cpu.carryFlag {
                 return Instruction(cycles: 6) { cpu, readMemory, writeMemory in
-                    let leastSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
-                    let mostSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
+                    cpu.stackPointer -= 1
+                    writeMemory(UInt8(cpu.programCounter >> 8), cpu.stackPointer)
+                    cpu.stackPointer -= 1
+                    writeMemory(UInt8(cpu.programCounter & 0xFF), cpu.stackPointer)
+                    
                     let address = (UInt16(mostSignificantByte) << 8) | UInt16(leastSignificantByte)
                     cpu.programCounter = address
                 }
@@ -1392,15 +1408,13 @@ extension InstructionBuilder {
             cpu.registerAF.hi = result.value
             cpu.updateFlag(result.flag)
         },
-        // RST n
+        // RST n RST 10
         0xD7: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
-            let mostSignificantByte = (cpu.programCounter >> 8) & 0xFF
-            let leastSignificantByte = cpu.programCounter & 0xFF
             cpu.stackPointer -= 1
-            writeMemory(UInt8(mostSignificantByte), cpu.stackPointer)
+            writeMemory(UInt8(cpu.programCounter >> 8), cpu.stackPointer)
             cpu.stackPointer -= 1
-            writeMemory(UInt8(leastSignificantByte), cpu.stackPointer)
-            cpu.programCounter = (0x10 << 8) | mostSignificantByte
+            writeMemory(UInt8(cpu.programCounter & 0xFF), cpu.stackPointer)
+            cpu.programCounter = 0x10
         },
         /// RET CC
         0xD8: InstructionBuilder { cpu, readMemory, writeMemory in
@@ -1442,12 +1456,17 @@ extension InstructionBuilder {
         },
         /// CALL cc, nn
         0xDC: InstructionBuilder { cpu, readMemory, writeMemory in
-            if cpu.zeroFlag {
+            let leastSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
+            let mostSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
+            if cpu.carryFlag {
                 return Instruction(cycles: 6) { cpu, readMemory, writeMemory in
-                    let leastSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
-                    let mostSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
+                    cpu.stackPointer -= 1
+                    writeMemory(UInt8(cpu.programCounter >> 8), cpu.stackPointer)
+                    cpu.stackPointer -= 1
+                    writeMemory(UInt8(cpu.programCounter & 0xFF), cpu.stackPointer)
+                    
                     let address = (UInt16(mostSignificantByte) << 8) | UInt16(leastSignificantByte)
                     cpu.programCounter = address
                 }
@@ -1463,15 +1482,13 @@ extension InstructionBuilder {
             cpu.registerAF.hi = result.value
             cpu.updateFlag(result.flag)
         },
-        // RST n
+        // RST n RST 18
         0xDF: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
-            let mostSignificantByte = (cpu.programCounter >> 8) & 0xFF
-            let leastSignificantByte = cpu.programCounter & 0xFF
             cpu.stackPointer -= 1
-            writeMemory(UInt8(mostSignificantByte), cpu.stackPointer)
+            writeMemory(UInt8(cpu.programCounter >> 8), cpu.stackPointer)
             cpu.stackPointer -= 1
-            writeMemory(UInt8(leastSignificantByte), cpu.stackPointer)
-            cpu.programCounter = (0x18 << 8) | mostSignificantByte
+            writeMemory(UInt8(cpu.programCounter & 0xFF), cpu.stackPointer)
+            cpu.programCounter = 0x18
         },
         
         // MARK: - 0xE0
@@ -1511,15 +1528,13 @@ extension InstructionBuilder {
             cpu.registerAF.hi = result.value
             cpu.updateFlag(result.flag)
         },
-        // RST n
+        // RST n RST 20
         0xE7: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
-            let mostSignificantByte = (cpu.programCounter >> 8) & 0xFF
-            let leastSignificantByte = cpu.programCounter & 0xFF
             cpu.stackPointer -= 1
-            writeMemory(UInt8(mostSignificantByte), cpu.stackPointer)
+            writeMemory(UInt8(cpu.programCounter >> 8), cpu.stackPointer)
             cpu.stackPointer -= 1
-            writeMemory(UInt8(leastSignificantByte), cpu.stackPointer)
-            cpu.programCounter = (0x20 << 8) | mostSignificantByte
+            writeMemory(UInt8(cpu.programCounter & 0xFF), cpu.stackPointer)
+            cpu.programCounter = 0x20
         },
         /// ADD SP
         0xE8: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
@@ -1559,15 +1574,13 @@ extension InstructionBuilder {
             cpu.registerAF.hi = result.value
             cpu.updateFlag(result.flag)
         },
-        // RST n
+        // RST n RST 28
         0xEF: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
-            let mostSignificantByte = (cpu.programCounter >> 8) & 0xFF
-            let leastSignificantByte = cpu.programCounter & 0xFF
             cpu.stackPointer -= 1
-            writeMemory(UInt8(mostSignificantByte), cpu.stackPointer)
+            writeMemory(UInt8(cpu.programCounter >> 8), cpu.stackPointer)
             cpu.stackPointer -= 1
-            writeMemory(UInt8(leastSignificantByte), cpu.stackPointer)
-            cpu.programCounter = (0x28 << 8) | mostSignificantByte
+            writeMemory(UInt8(cpu.programCounter & 0xFF), cpu.stackPointer)
+            cpu.programCounter = 0x28
         },
         
         // MARK: - 0xF0
@@ -1576,7 +1589,8 @@ extension InstructionBuilder {
             let leastSignificantByte = readMemory(cpu.programCounter)
             cpu.programCounter += 1
             let address: UInt16 = 0xFF00 | UInt16(leastSignificantByte)
-            cpu.registerAF.hi = readMemory(address)
+            let value = readMemory(address)
+            cpu.registerAF.hi = value
         },
         /// POP rr
         0xF1: InstructionBuilder(cycles: 3) { cpu, readMemory, writeMemory in
@@ -1611,15 +1625,13 @@ extension InstructionBuilder {
             cpu.registerAF.hi = result.value
             cpu.updateFlag(result.flag)
         },
-        // RST n
+        // RST n RST 30
         0xF7: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
-            let mostSignificantByte = (cpu.programCounter >> 8) & 0xFF
-            let leastSignificantByte = cpu.programCounter & 0xFF
             cpu.stackPointer -= 1
-            writeMemory(UInt8(mostSignificantByte), cpu.stackPointer)
+            writeMemory(UInt8(cpu.programCounter >> 8), cpu.stackPointer)
             cpu.stackPointer -= 1
-            writeMemory(UInt8(leastSignificantByte), cpu.stackPointer)
-            cpu.programCounter = (0x30 << 8) | mostSignificantByte
+            writeMemory(UInt8(cpu.programCounter & 0xFF), cpu.stackPointer)
+            cpu.programCounter = 0x30
         },
         /// LD HL, SP+e
         0xF8: InstructionBuilder(cycles: 3) { cpu, readMemory, writeMemory in
@@ -1655,15 +1667,13 @@ extension InstructionBuilder {
             let result = ALU.sub(cpu.registerAF.hi, value)
             cpu.updateFlag(result.flag)
         },
-        // RST n
+        // RST n RST 38
         0xFF: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
-            let mostSignificantByte = (cpu.programCounter >> 8) & 0xFF
-            let leastSignificantByte = cpu.programCounter & 0xFF
             cpu.stackPointer -= 1
-            writeMemory(UInt8(mostSignificantByte), cpu.stackPointer)
+            writeMemory(UInt8(cpu.programCounter >> 8), cpu.stackPointer)
             cpu.stackPointer -= 1
-            writeMemory(UInt8(leastSignificantByte), cpu.stackPointer)
-            cpu.programCounter = (0x38 << 8) | mostSignificantByte
+            writeMemory(UInt8(cpu.programCounter & 0xFF), cpu.stackPointer)
+            cpu.programCounter = 0x38
         },
     ]
     

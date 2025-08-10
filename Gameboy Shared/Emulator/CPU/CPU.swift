@@ -7,8 +7,8 @@
 
 import Foundation
     
-struct CPU {
-    init() {
+public struct CPU {
+    public init() {
         self.instructionRegister = 0
         self.interruptMasterEnabled = false
         self.stackPointer = 0x0
@@ -20,38 +20,43 @@ struct CPU {
         self.registerHL = Register(0x0)
     }
     
-    var instructionRegister: UInt8
-    var stackPointer: UInt16
-//    {
-//        willSet {
-//            print("\(stackPointer) new: \(newValue)")
-//        }
-//    }
-    var programCounter: UInt16
+    public var instructionRegister: UInt8
+    public var stackPointer: UInt16
+    public var programCounter: UInt16
     
-    var registerAF: Register
-    var registerBC: Register
-    var registerDE: Register
-    var registerHL: Register
+    public var registerAF: Register
+    public var registerBC: Register
+    public var registerDE: Register
+    public var registerHL: Register
     
-    var interruptMasterEnabled: Bool = false
-    var interruptEnable: InterruptRegister = .init(value: 0x0)
+    public var interruptMasterEnabled: Bool = false
+    public var interruptEnable: InterruptRegister = .init(value: 0x0)
     
-    var carryFlag: Bool {
+    public var carryFlag: Bool {
         registerAF.lo.bit(4)
     }
     
-    var zeroFlag: Bool {
+    public var zeroFlag: Bool {
         registerAF.lo.bit(7)
     }
     
+    public var cycleCounter: Int = 0
+    
     mutating func update(readMemory: (UInt16) -> UInt8, writeMemory: (UInt8, UInt16) -> Void) {
+        if cycleCounter > 0 {
+            cycleCounter -= 1
+            return
+        }
         let opcode = readMemory(programCounter)
-        print(String(format: "%llx %llx", opcode, programCounter))
-        programCounter += 1
+//        print(String(format: "%llx %llx", opcode, programCounter))
+        if programCounter == 0x36f, opcode == 0x11 {
+            print("HEY")
+        }
+        programCounter &+= 1
         let instructionBuilder = InstructionBuilder.instructions[opcode]
         if let instructionBuilder {
             let instruction = instructionBuilder.build(&self, readMemory, writeMemory)
+            cycleCounter += ((instruction.cycles - 1) * 4)
             instruction.perform(&self, readMemory, writeMemory)
         }
     }
@@ -72,7 +77,7 @@ struct CPU {
         }
     }
     
-    mutating func updateFlag(_ flag: ALU.Flag) {
+    public mutating func updateFlag(_ flag: ALU.Flag) {
         let flagValue = registerAF.lo
         let flagZero = switch flag.zero {
         case let .some(value):

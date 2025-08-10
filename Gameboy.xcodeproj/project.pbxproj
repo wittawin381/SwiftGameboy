@@ -6,7 +6,23 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		253B6CA72E462E300048EE0F /* DequeModule in Frameworks */ = {isa = PBXBuildFile; productRef = 253B6CA62E462E300048EE0F /* DequeModule */; };
+		253B6CA92E462E610048EE0F /* DequeModule in Frameworks */ = {isa = PBXBuildFile; productRef = 253B6CA82E462E610048EE0F /* DequeModule */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		254449492E4722050081DE36 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 25B08F122E1422C100BB39AF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 25B08F3F2E1422C400BB39AF;
+			remoteInfo = "Gameboy macOS";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		254449452E4722050081DE36 /* GameboyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GameboyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		25B08F1F2E1422C400BB39AF /* Gameboy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gameboy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		25B08F302E1422C400BB39AF /* Gameboy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gameboy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		25B08F402E1422C400BB39AF /* Gameboy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gameboy.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -35,7 +51,9 @@
 				"Extension/Bool+Extension.swift",
 				"Extension/Collection+Extension.swift",
 				"Extension/UInt8+Extension.swift",
+				GBMetailKitView.swift,
 				Renderer.swift,
+				Roms/cpu_instrs.gb,
 				Roms/dmg_boot.bin,
 				Roms/Tetris.gb,
 				Shaders.metal,
@@ -46,7 +64,9 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
+				GBMetailKitView.swift,
 				Renderer.swift,
+				Roms/cpu_instrs.gb,
 				Roms/dmg_boot.bin,
 				Roms/Tetris.gb,
 				Shaders.metal,
@@ -75,7 +95,9 @@
 				"Extension/Bool+Extension.swift",
 				"Extension/Collection+Extension.swift",
 				"Extension/UInt8+Extension.swift",
+				GBMetailKitView.swift,
 				Renderer.swift,
+				Roms/cpu_instrs.gb,
 				Roms/dmg_boot.bin,
 				Roms/Tetris.gb,
 				Shaders.metal,
@@ -109,6 +131,11 @@
 /* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		254449462E4722050081DE36 /* GameboyTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = GameboyTests;
+			sourceTree = "<group>";
+		};
 		25B08F162E1422C100BB39AF /* Gameboy Shared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -140,10 +167,18 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		254449422E4722050081DE36 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		25B08F1C2E1422C400BB39AF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				253B6CA92E462E610048EE0F /* DequeModule in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -158,6 +193,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				253B6CA72E462E300048EE0F /* DequeModule in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -171,6 +207,7 @@
 				25B08F212E1422C400BB39AF /* Gameboy iOS */,
 				25B08F312E1422C400BB39AF /* Gameboy tvOS */,
 				25B08F412E1422C400BB39AF /* Gameboy macOS */,
+				254449462E4722050081DE36 /* GameboyTests */,
 				25B08F202E1422C400BB39AF /* Products */,
 			);
 			sourceTree = "<group>";
@@ -181,6 +218,7 @@
 				25B08F1F2E1422C400BB39AF /* Gameboy.app */,
 				25B08F302E1422C400BB39AF /* Gameboy.app */,
 				25B08F402E1422C400BB39AF /* Gameboy.app */,
+				254449452E4722050081DE36 /* GameboyTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -188,6 +226,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		254449442E4722050081DE36 /* GameboyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2544494B2E4722050081DE36 /* Build configuration list for PBXNativeTarget "GameboyTests" */;
+			buildPhases = (
+				254449412E4722050081DE36 /* Sources */,
+				254449422E4722050081DE36 /* Frameworks */,
+				254449432E4722050081DE36 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2544494A2E4722050081DE36 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				254449462E4722050081DE36 /* GameboyTests */,
+			);
+			name = GameboyTests;
+			packageProductDependencies = (
+			);
+			productName = GameboyTests;
+			productReference = 254449452E4722050081DE36 /* GameboyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		25B08F1E2E1422C400BB39AF /* Gameboy iOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 25B08F572E1422C400BB39AF /* Build configuration list for PBXNativeTarget "Gameboy iOS" */;
@@ -205,6 +266,7 @@
 			);
 			name = "Gameboy iOS";
 			packageProductDependencies = (
+				253B6CA82E462E610048EE0F /* DequeModule */,
 			);
 			productName = "Gameboy iOS";
 			productReference = 25B08F1F2E1422C400BB39AF /* Gameboy.app */;
@@ -249,6 +311,7 @@
 			);
 			name = "Gameboy macOS";
 			packageProductDependencies = (
+				253B6CA62E462E300048EE0F /* DequeModule */,
 			);
 			productName = "Gameboy macOS";
 			productReference = 25B08F402E1422C400BB39AF /* Gameboy.app */;
@@ -261,9 +324,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1620;
+				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
+					254449442E4722050081DE36 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 25B08F3F2E1422C400BB39AF;
+					};
 					25B08F1E2E1422C400BB39AF = {
 						CreatedOnToolsVersion = 16.2;
 					};
@@ -284,6 +351,9 @@
 			);
 			mainGroup = 25B08F112E1422C100BB39AF;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				253B6CA52E462E300048EE0F /* XCRemoteSwiftPackageReference "swift-collections" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 25B08F202E1422C400BB39AF /* Products */;
 			projectDirPath = "";
@@ -292,11 +362,19 @@
 				25B08F1E2E1422C400BB39AF /* Gameboy iOS */,
 				25B08F2F2E1422C400BB39AF /* Gameboy tvOS */,
 				25B08F3F2E1422C400BB39AF /* Gameboy macOS */,
+				254449442E4722050081DE36 /* GameboyTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		254449432E4722050081DE36 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		25B08F1D2E1422C400BB39AF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -321,6 +399,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		254449412E4722050081DE36 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		25B08F1B2E1422C400BB39AF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -344,7 +429,61 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		2544494A2E4722050081DE36 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 25B08F3F2E1422C400BB39AF /* Gameboy macOS */;
+			targetProxy = 254449492E4722050081DE36 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		2544494C2E4722050081DE36 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B724F5GJBF;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wittawin.GameboyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Gameboy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Gameboy";
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Debug;
+		};
+		2544494D2E4722050081DE36 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B724F5GJBF;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wittawin.GameboyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Gameboy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Gameboy";
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Release;
+		};
 		25B08F582E1422C400BB39AF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -642,6 +781,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		2544494B2E4722050081DE36 /* Build configuration list for PBXNativeTarget "GameboyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2544494C2E4722050081DE36 /* Debug */,
+				2544494D2E4722050081DE36 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		25B08F152E1422C100BB39AF /* Build configuration list for PBXProject "Gameboy" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -679,6 +827,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		253B6CA52E462E300048EE0F /* XCRemoteSwiftPackageReference "swift-collections" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-collections.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		253B6CA62E462E300048EE0F /* DequeModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 253B6CA52E462E300048EE0F /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = DequeModule;
+		};
+		253B6CA82E462E610048EE0F /* DequeModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 253B6CA52E462E300048EE0F /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = DequeModule;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 25B08F122E1422C100BB39AF /* Project object */;
 }
