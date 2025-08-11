@@ -40,12 +40,14 @@ class Renderer: NSObject, MTKViewDelegate {
     func emulatorRun() {
         Task {
             while true {
+                cycleCount += 1
                 let action = gameboy.run()
                 switch action {
                 case .idle:
                     break
                 case .drawFrame(let frameBuffer):
                     self.frameBuffer = frameBuffer
+//                    print(Date.now.timeIntervalSince1970)
                 }
             }
         }
@@ -110,6 +112,10 @@ class Renderer: NSObject, MTKViewDelegate {
         )
         
         super.init()
+        
+        if let gbMetalKitView = metalKitView as? GBMetalKitView {
+            gbMetalKitView.gbMetalKitViewDelegate = self
+        }
     }
     
     private func makeLibrary(device: MTLDevice) -> MTLLibrary {
@@ -204,4 +210,14 @@ func matrix_perspective_right_hand(fovyRadians fovy: Float, aspectRatio: Float, 
 
 func radians_from_degrees(_ degrees: Float) -> Float {
     return (degrees / 180) * .pi
+}
+
+extension Renderer: GBMetailKitViewDelegate {
+    func metalKitView(_ metalKitView: GBMetalKitView, keyboardDidPressed key: GBMetalKitView.KeyCode) {
+        gameboy.keyEvent(.keyDown(key.joypadKey))
+    }
+    
+    func metalKitView(_ metalKitView: GBMetalKitView, keyboardDidReleased key: GBMetalKitView.KeyCode) {
+        gameboy.keyEvent(.keyUp(key.joypadKey))
+    }
 }

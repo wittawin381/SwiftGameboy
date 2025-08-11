@@ -29,6 +29,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		25444A722E49E58D0081DE36 /* Exceptions for "Gameboy Shared" folder in "GameboyTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Emulator/Graphics/FrameBuffer.swift,
+				Emulator/Graphics/PixelFetcher.swift,
+			);
+			target = 254449442E4722050081DE36 /* GameboyTests */;
+		};
 		25B08F562E1422C400BB39AF /* Exceptions for "Gameboy Shared" folder in "Gameboy iOS" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -44,14 +52,16 @@
 				Emulator/Device/Device.swift,
 				Emulator/Device/IORegisters.swift,
 				Emulator/Emulator.swift,
-				Emulator/Graphics/PictureProcessingUnit.swift,
+				Emulator/Graphics/FrameBuffer.swift,
 				Emulator/Graphics/PixelData.swift,
+				Emulator/Graphics/PixelFetcher.swift,
+				Emulator/Graphics/PPU.swift,
 				Extension/BitAccessible.swift,
 				Extension/BitTestable.swift,
 				"Extension/Bool+Extension.swift",
 				"Extension/Collection+Extension.swift",
 				"Extension/UInt8+Extension.swift",
-				GBMetailKitView.swift,
+				GBMetalKitView.swift,
 				Renderer.swift,
 				Roms/cpu_instrs.gb,
 				Roms/dmg_boot.bin,
@@ -64,7 +74,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
-				GBMetailKitView.swift,
+				GBMetalKitView.swift,
 				Renderer.swift,
 				Roms/cpu_instrs.gb,
 				Roms/dmg_boot.bin,
@@ -88,14 +98,16 @@
 				Emulator/Device/Device.swift,
 				Emulator/Device/IORegisters.swift,
 				Emulator/Emulator.swift,
-				Emulator/Graphics/PictureProcessingUnit.swift,
+				Emulator/Graphics/FrameBuffer.swift,
 				Emulator/Graphics/PixelData.swift,
+				Emulator/Graphics/PixelFetcher.swift,
+				Emulator/Graphics/PPU.swift,
 				Extension/BitAccessible.swift,
 				Extension/BitTestable.swift,
 				"Extension/Bool+Extension.swift",
 				"Extension/Collection+Extension.swift",
 				"Extension/UInt8+Extension.swift",
-				GBMetailKitView.swift,
+				GBMetalKitView.swift,
 				Renderer.swift,
 				Roms/cpu_instrs.gb,
 				Roms/dmg_boot.bin,
@@ -145,6 +157,7 @@
 				25B08F5F2E1422C400BB39AF /* Exceptions for "Gameboy Shared" folder in "Copy Bundle Resources" phase from "Gameboy tvOS" target */,
 				25B08F602E1422C400BB39AF /* Exceptions for "Gameboy Shared" folder in "Gameboy macOS" target */,
 				25B08F642E1422C400BB39AF /* Exceptions for "Gameboy Shared" folder in "Copy Bundle Resources" phase from "Gameboy macOS" target */,
+				25444A722E49E58D0081DE36 /* Exceptions for "Gameboy Shared" folder in "GameboyTests" target */,
 			);
 			path = "Gameboy Shared";
 			sourceTree = "<group>";

@@ -42,28 +42,29 @@ public struct CPU {
     
     public var cycleCounter: Int = 0
     
-    mutating func update(readMemory: (UInt16) -> UInt8, writeMemory: (UInt8, UInt16) -> Void) {
+    mutating func advance(readMemory: (UInt16) -> UInt8, writeMemory: (UInt8, UInt16) -> Void) {
         if cycleCounter > 0 {
             cycleCounter -= 1
             return
         }
+        if handleInterrupt(readMemory: readMemory, writeMemory: writeMemory) {
+            return
+        }
         let opcode = readMemory(programCounter)
 //        print(String(format: "%llx %llx", opcode, programCounter))
-        if programCounter == 0x36f, opcode == 0x11 {
-            print("HEY")
-        }
         programCounter &+= 1
         let instructionBuilder = InstructionBuilder.instructions[opcode]
         if let instructionBuilder {
             let instruction = instructionBuilder.build(&self, readMemory, writeMemory)
-            cycleCounter += ((instruction.cycles - 1) * 4)
+            cycleCounter += ((instruction.cycles - 1) * 4) - 1
             instruction.perform(&self, readMemory, writeMemory)
         }
     }
     
-    mutating func handleInterrupt(readMemory: (UInt16) -> UInt8, writeMemory: (UInt8, UInt16) -> Void) {
+    public mutating func handleInterrupt(readMemory: (UInt16) -> UInt8, writeMemory: (UInt8, UInt16) -> Void) -> Bool {
+        guard interruptMasterEnabled else { return false }
+        
         var interruptFlag = InterruptRegister(value: readMemory(0xFF0F))
-        guard interruptMasterEnabled else { return }
         
         if let respondedInterrupt = interruptFlag.findFirstRespondedInterrupt(using: interruptEnable){
             stackPointer -= 1
@@ -74,7 +75,11 @@ public struct CPU {
             
             interruptFlag.unset(respondedInterrupt)
             writeMemory(interruptFlag.value, 0xFF0F)
+            interruptMasterEnabled = false
+            writeMemory(interruptFlag.value, 0xFF0F)
+            return true
         }
+        return false
     }
     
     public mutating func updateFlag(_ flag: ALU.Flag) {
