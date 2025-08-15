@@ -113,9 +113,11 @@ class Renderer: NSObject, MTKViewDelegate {
         
         super.init()
         
+        #if os(macOS)
         if let gbMetalKitView = metalKitView as? GBMetalKitView {
             gbMetalKitView.gbMetalKitViewDelegate = self
         }
+        #endif
     }
     
     private func makeLibrary(device: MTLDevice) -> MTLLibrary {
@@ -212,6 +214,7 @@ func radians_from_degrees(_ degrees: Float) -> Float {
     return (degrees / 180) * .pi
 }
 
+#if os(macOS)
 extension Renderer: GBMetailKitViewDelegate {
     func metalKitView(_ metalKitView: GBMetalKitView, keyboardDidPressed key: GBMetalKitView.KeyCode) {
         gameboy.keyEvent(.keyDown(key.joypadKey))
@@ -221,3 +224,4 @@ extension Renderer: GBMetailKitViewDelegate {
         gameboy.keyEvent(.keyUp(key.joypadKey))
     }
 }
+#endif

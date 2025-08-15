@@ -19,7 +19,7 @@ extension BitAccessible where Self: FixedWidthInteger {
 
 //extension UInt8: BitAccessible {}
 
-extension UInt8 {
+public extension UInt8 {
     func bit(_ index: UInt8) -> Bool {
         (self >> index) & 0x1 == 1
     }
@@ -29,7 +29,7 @@ extension UInt8 {
     }
 }
 
-extension UInt16 {
+public extension UInt16 {
     func bit(_ index: UInt8) -> Bool {
         (self >> index) & 0x1 == 1
     }

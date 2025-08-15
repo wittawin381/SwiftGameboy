@@ -68,6 +68,14 @@ struct Device {
                 
             }
             writeMemory: { value, address in
+                if address == 0xC06A, value != 0xCB {
+                    print("WRITE HERER")
+                }
+                /// step 1
+                /// 24 c5ad
+               /// SET HL : 218 195
+               /// SET AF : 198
+               /// e0 c5ae
                 switch address {
                 case 0x0...0x7FFF:
                     return cartridge.memoryBankController.write(value, at: address)
@@ -90,6 +98,8 @@ struct Device {
             }
         }
         
+        ioRegisters.advance()
+
         return ioRegisters.ppu.advance(
             vRam: vRam,
             interruptRequestHandler: { type in

@@ -111,9 +111,16 @@ public extension InstructionBuilder {
         },
         /// ADD HL
         0x09: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
-            let result = ALU.add16(cpu.registerHL.all, cpu.registerBC.all)
+            let result = ALU.add16(cpu.registerHL.all, cpu.registerBC.all, carryBit: 11)
             cpu.registerHL.all = result.value
-            cpu.updateFlag(result.flag)
+            cpu.updateFlag(
+                ALU.Flag(
+                    zero: .noneAffected,
+                    subtract: result.flag.subtract,
+                    halfCarry: result.flag.halfCarry,
+                    carry: result.flag.carry
+                )
+            )
         },
         /// LD A, (BC) Load to the 8-bit A register, data from the absolute address specified by the 16-bit register BC.
         0x0A: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -143,7 +150,7 @@ public extension InstructionBuilder {
         /// RRCA
         0x0F: InstructionBuilder(cycles: 1) { cpu, readMemory, writeMemory in
             let bit0 = cpu.registerAF.hi.bit(0)
-            let shiftedValue = (cpu.registerAF.hi >> 1) | (bit0.toUInt8() << 7)
+            let shiftedValue = (bit0.toUInt8() << 7) | (cpu.registerAF.hi >> 1)
             cpu.registerAF.hi = shiftedValue
             let flag = ALU.Flag(
                 zero: .some(false),
@@ -155,6 +162,11 @@ public extension InstructionBuilder {
         },
         
         // MARK: - 0x01
+        /// LD rr 16 bit
+        /// TODO: - correctly implement STOP
+        0x10: InstructionBuilder(cycles: 3) { cpu, readMemory, writeMemory in
+            cpu.programCounter += 1
+        },
         /// LD rr 16 bit
         0x11: InstructionBuilder(cycles: 3) { cpu, readMemory, writeMemory in
             let leastSignificantByte: UInt8 = readMemory(cpu.programCounter)
@@ -208,14 +220,23 @@ public extension InstructionBuilder {
         0x18: InstructionBuilder(cycles: 3) { cpu, readMemory, writeMemory in
             let value = readMemory(cpu.programCounter)
             cpu.programCounter += 1
-            let signedValue = Int8(bitPattern: value)
-            cpu.programCounter &+= UInt16(bitPattern: Int16(signedValue))
+            let signedValue = Int16(Int8(bitPattern: value))
+            let programCounter = Int16(bitPattern: cpu.programCounter)
+            let address = programCounter + signedValue
+            cpu.programCounter = UInt16(bitPattern: address)
         },
         /// ADD HL
         0x19: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
-            let result = ALU.add16(cpu.registerHL.all, cpu.registerDE.all)
+            let result = ALU.add16(cpu.registerHL.all, cpu.registerDE.all, carryBit: 11)
             cpu.registerHL.all = result.value
-            cpu.updateFlag(result.flag)
+            cpu.updateFlag(
+                ALU.Flag(
+                    zero: .noneAffected,
+                    subtract: result.flag.subtract,
+                    halfCarry: result.flag.halfCarry,
+                    carry: result.flag.carry
+                )
+            )
         },
         /// LD A, (BC) Load to the 8-bit A register, data from the absolute address specified by the 16-bit register BC.
         0x1A: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -333,9 +354,16 @@ public extension InstructionBuilder {
         },
         /// ADD HL
         0x29: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
-            let result = ALU.add16(cpu.registerHL.all, cpu.registerHL.all)
+            let result = ALU.add16(cpu.registerHL.all, cpu.registerHL.all, carryBit: 11)
             cpu.registerHL.all = result.value
-            cpu.updateFlag(result.flag)
+            cpu.updateFlag(
+                ALU.Flag(
+                    zero: .noneAffected,
+                    subtract: result.flag.subtract,
+                    halfCarry: result.flag.halfCarry,
+                    carry: result.flag.carry
+                )
+            )
         },
         /// LD A, (HL+)
         0x2A: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -442,25 +470,29 @@ public extension InstructionBuilder {
         },
         /// JR cc, e
         0x38: InstructionBuilder { cpu, readMemory, writeMemory in
+            let value = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
             if cpu.carryFlag {
                 return Instruction(cycles: 3) { cpu, readMemory, writeMemory in
-                    let value = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
                     let signedValue = Int8(bitPattern: value)
                     cpu.programCounter += UInt16(bitPattern: Int16(signedValue))
                 }
             } else {
-                return Instruction(cycles: 2) { cpu, readMemory, writeMemory in
-                    let _ = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
-                }
+                return Instruction(cycles: 2) { _, _, _ in }
             }
         },
         /// ADD HL
         0x39: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
-            let result = ALU.add16(cpu.registerHL.all, cpu.stackPointer)
+            let result = ALU.add16(cpu.registerHL.all, cpu.stackPointer, carryBit: 11)
             cpu.registerHL.all = result.value
-            cpu.updateFlag(result.flag)
+            cpu.updateFlag(
+                ALU.Flag(
+                    zero: .noneAffected,
+                    subtract: result.flag.subtract,
+                    halfCarry: result.flag.halfCarry,
+                    carry: result.flag.carry
+                )
+            )
         },
         /// LD A, (HL-)
         0x3A: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -722,6 +754,10 @@ public extension InstructionBuilder {
         0x75: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
             writeMemory(cpu.registerHL.lo, cpu.registerHL.all)
         },
+        /// TODO: implement correct HALT instruction
+        0x76: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
+            cpu.enabled = false
+        },
         //LD (HL), r Load to the absolute address specified by the 16-bit register HL, data from the 8-bit register r.
         0x77: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
             writeMemory(cpu.registerAF.hi, cpu.registerHL.all)
@@ -793,6 +829,13 @@ public extension InstructionBuilder {
         /// ADD r
         0x85: InstructionBuilder(cycles: 1) { cpu, readMemory, writeMemory in
             let result = ALU.add(cpu.registerAF.hi, cpu.registerHL.lo)
+            cpu.registerAF.hi = result.value
+            cpu.updateFlag(result.flag)
+        },
+        /// ADD r
+        0x86: InstructionBuilder(cycles: 1) { cpu, readMemory, writeMemory in
+            let value = readMemory(cpu.registerHL.all)
+            let result = ALU.add(cpu.registerAF.hi, value)
             cpu.registerAF.hi = result.value
             cpu.updateFlag(result.flag)
         },
@@ -1169,12 +1212,12 @@ public extension InstructionBuilder {
         },
         /// JP cc, nn
         0xC2: InstructionBuilder { cpu, readMemory, writeMemory in
+            let leastSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
+            let mostSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
             if !cpu.zeroFlag {
                 return Instruction(cycles: 4) { cpu, readMemory, writeMemory in
-                    let leastSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
-                    let mostSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
                     let address = (UInt16(mostSignificantByte) << 8) | UInt16(leastSignificantByte)
                     cpu.programCounter = address
                 }
@@ -1259,12 +1302,12 @@ public extension InstructionBuilder {
         },
         /// JP cc, nn
         0xCA: InstructionBuilder { cpu, readMemory, writeMemory in
+            let leastSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
+            let mostSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
             if cpu.zeroFlag {
                 return Instruction(cycles: 4) { cpu, readMemory, writeMemory in
-                    let leastSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
-                    let mostSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
                     let address = (UInt16(mostSignificantByte) << 8) | UInt16(leastSignificantByte)
                     cpu.programCounter = address
                 }
@@ -1360,12 +1403,12 @@ public extension InstructionBuilder {
         },
         /// JP cc, nn
         0xD2: InstructionBuilder { cpu, readMemory, writeMemory in
+            let leastSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
+            let mostSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
             if !cpu.carryFlag {
                 return Instruction(cycles: 4) { cpu, readMemory, writeMemory in
-                    let leastSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
-                    let mostSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
                     let address = (UInt16(mostSignificantByte) << 8) | UInt16(leastSignificantByte)
                     cpu.programCounter = address
                 }
@@ -1441,12 +1484,12 @@ public extension InstructionBuilder {
         },
         /// JP cc, nn
         0xDA: InstructionBuilder { cpu, readMemory, writeMemory in
+            let leastSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
+            let mostSignificantByte = readMemory(cpu.programCounter)
+            cpu.programCounter += 1
             if cpu.carryFlag {
                 return Instruction(cycles: 4) { cpu, readMemory, writeMemory in
-                    let leastSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
-                    let mostSignificantByte = readMemory(cpu.programCounter)
-                    cpu.programCounter += 1
                     let address = (UInt16(mostSignificantByte) << 8) | UInt16(leastSignificantByte)
                     cpu.programCounter = address
                 }
@@ -1541,9 +1584,9 @@ public extension InstructionBuilder {
             let value = readMemory(cpu.programCounter)
             cpu.programCounter += 1
             let signedValue = Int8(bitPattern: value)
+            let halfCarry = ALU.checkCarry(cpu.stackPointer, UInt16(bitPattern: Int16(signedValue)), carryBit: 3)
+            let carry = ALU.checkCarry(cpu.stackPointer, UInt16(bitPattern: Int16(signedValue)), carryBit: 7)
             cpu.stackPointer = cpu.stackPointer &+ UInt16(bitPattern: Int16(signedValue))
-            let halfCarry = checkCarry(cpu.stackPointer, UInt16(bitPattern: Int16(signedValue)), atBit: 3)
-            let carry = checkCarry(cpu.stackPointer, UInt16(bitPattern: Int16(signedValue)), atBit: 7)
             
             let flag = ALU.Flag(
                 zero: .some(false),
@@ -1598,7 +1641,7 @@ public extension InstructionBuilder {
             cpu.stackPointer += 1
             let mostSignificantByte = readMemory(cpu.stackPointer)
             cpu.stackPointer += 1
-            cpu.registerAF.all = (UInt16(mostSignificantByte) << 8) | UInt16(leastSignificantByte)
+            cpu.registerAF.all = (UInt16(mostSignificantByte) << 8) | UInt16(leastSignificantByte & 0xF0)
         },
         /// LDH  A, (C)
         0xF2: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -1638,10 +1681,17 @@ public extension InstructionBuilder {
             let value = readMemory(cpu.programCounter)
             cpu.programCounter += 1
             let signedValue = Int8(bitPattern: value)
-            let flagH: UInt8 = checkCarry(UInt16(value), cpu.stackPointer, atBit: 3) ? 1 : 0
-            let flagC: UInt8 = checkCarry(UInt16(value), cpu.stackPointer, atBit: 7) ? 1 : 0
+            let halfCarry = ALU.checkCarry(cpu.stackPointer, UInt16(bitPattern: Int16(signedValue)), carryBit: 3)
+            let carry = ALU.checkCarry(cpu.stackPointer, UInt16(bitPattern: Int16(signedValue)), carryBit: 7)
             cpu.registerHL.all = cpu.stackPointer &+ UInt16(bitPattern: Int16(signedValue))
-            cpu.registerAF.lo = createRegisterFValueFromFlag(z: 0, n: 0, h: flagH, c: flagC)
+            cpu.updateFlag(
+                ALU.Flag(
+                    zero: .some(false),
+                    subtract: .some(false),
+                    halfCarry: .some(halfCarry),
+                    carry: .some(carry)
+                )
+            )
         },
         /// LD SP, HL
         0xF9: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -2021,7 +2071,7 @@ public extension InstructionBuilder {
         0x19: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
             let carry = cpu.carryFlag.toUInt8()
             let bit0 = cpu.registerBC.lo.bit(0)
-            let shiftedValue = (cpu.registerBC.hi >> 1) | (carry << 7)
+            let shiftedValue = (cpu.registerBC.lo >> 1) | (carry << 7)
             cpu.registerBC.lo = shiftedValue
             let flag = ALU.Flag(
                 zero: .some(shiftedValue == 0),
@@ -2350,6 +2400,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(false)
             )
+            cpu.updateFlag(flag)
         },
         /// SWAP r
         0x31: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -2363,6 +2414,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(false)
             )
+            cpu.updateFlag(flag)
         },
         /// SWAP r
         0x32: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -2376,6 +2428,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(false)
             )
+            cpu.updateFlag(flag)
         },
         /// SWAP r
         0x33: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -2389,6 +2442,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(false)
             )
+            cpu.updateFlag(flag)
         },
         /// SWAP r
         0x34: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -2402,6 +2456,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(false)
             )
+            cpu.updateFlag(flag)
         },
         /// SWAP r
         0x35: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -2415,6 +2470,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(false)
             )
+            cpu.updateFlag(flag)
         },
         /// SWAP HL
         0x36: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
@@ -2429,6 +2485,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(false)
             )
+            cpu.updateFlag(flag)
         },
         /// SWAP r
         0x37: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -2442,6 +2499,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(false)
             )
+            cpu.updateFlag(flag)
         },
         /// SRL r
         0x38: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -2454,6 +2512,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(bit0)
             )
+            cpu.updateFlag(flag)
         },
         /// SRL r
         0x39: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -2466,6 +2525,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(bit0)
             )
+            cpu.updateFlag(flag)
         },
         /// SRL r
         0x3A: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -2478,6 +2538,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(bit0)
             )
+            cpu.updateFlag(flag)
         },
         /// SRL r
         0x3B: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -2490,6 +2551,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(bit0)
             )
+            cpu.updateFlag(flag)
         },
         /// SRL r
         0x3C: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -2502,6 +2564,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(bit0)
             )
+            cpu.updateFlag(flag)
         },
         /// SRL r
         0x3D: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -2514,6 +2577,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(bit0)
             )
+            cpu.updateFlag(flag)
         },
         /// SRL HL
         0x3E: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
@@ -2527,6 +2591,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(bit0)
             )
+            cpu.updateFlag(flag)
         },
         /// SRL r
         0x3F: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -2539,6 +2604,7 @@ public extension InstructionBuilder {
                 halfCarry: .some(false),
                 carry: .some(bit0)
             )
+            cpu.updateFlag(flag)
         },
         /// BIT b, r
         0x40: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in

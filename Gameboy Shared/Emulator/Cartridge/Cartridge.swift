@@ -38,7 +38,8 @@ struct Cartridge {
     }
     
     func readValue(at address: UInt16) -> UInt8 {
-        let mappedAddress = memoryBankController.readAddress(for: address)
-        return data[Int(mappedAddress)]
+//        let mappedAddress = memoryBankController.readAddress(for: address)
+//        return data[Int(mappedAddress)]
+        return data[address]
     }
 }

@@ -31,7 +31,7 @@ class GameViewController: NSViewController {
 
         mtkView.device = defaultDevice
 
-        guard let cartridge = try? Emulator().loadRom("Tetris.gb") else { return }
+        guard let cartridge = try? Emulator().loadRom("02-interrupts.gb") else { return }
         
         guard let bootRom = try? Emulator().loadBootRom("dmg_boot.bin") else { return }
 

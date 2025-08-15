@@ -42,8 +42,8 @@ public enum ALU {
         let result = x &+ y &+ carryValue
         let zeroFlag = result == 0
         let subtractFlag = false
-        let halfCarryFlag = (x & 0xF) &+ (y & 0xF) &+ carryValue > 0xF
-        let carryFlag = UInt16(x) &+ UInt16(y) &+ carry.toUInt16() > 0xFF
+        let halfCarryFlag = (x & 0x0F) + (y & 0x0F) + carryValue > 0x0F
+        let carryFlag = UInt16(x) + UInt16(y) + UInt16(carryValue) > 0xFF
         return Result(
             value: result,
             flag: Flag(
@@ -55,10 +55,10 @@ public enum ALU {
         )
     }
     
-    static func add16(_ x: UInt16, _ y: UInt16) -> Result<UInt16> {
+    static func add16(_ x: UInt16, _ y: UInt16, carryBit: UInt8) -> Result<UInt16> {
         let result = x &+ y
-        let halfCarryFlag = (x & 0xFFF) &+ (y & 0xFFF) > 0xFFF
-        let carryFlag = UInt32(x) &+ UInt32(y) > 0xFFFF
+        let halfCarryFlag = checkCarry(x, y, carryBit: carryBit)
+        let carryFlag = x > 0xFFFF - y
         return Result(
             value: result,
             flag: Flag(
@@ -70,6 +70,11 @@ public enum ALU {
         )
     }
     
+    static func checkCarry(_ num1: UInt16, _ num2: UInt16, carryBit: UInt8) -> Bool {
+        let mask = UInt16(0xFFFF) >> (15 - carryBit)
+        return (num1 & mask) + (num2 & mask) > mask
+    }
+    
     static func increment(_ value: UInt8) -> Result<UInt8> {
         let result = value &+ 1
         return Result(
@@ -77,7 +82,8 @@ public enum ALU {
             flag: Flag(
                 zero: .some(result == 0),
                 subtract: .some(false),
-                halfCarry: .some((value & 0x0F) &+ 1 > 0x0F),
+                halfCarry: .some((((value ^ 1 ^ result) & 0x10) != 0)),
+//                halfCarry: .some((value & 0x0F) + (1 & 0x0F) > 0x0F),
                 carry: .noneAffected
             )
         )
@@ -90,7 +96,7 @@ public enum ALU {
             flag: Flag(
                 zero: .some(result == 0),
                 subtract: .some(true),
-                halfCarry: .some(result < 0x1),
+                halfCarry: .some(((value & 0x0F) &- (1 & 0x0F)) & 0x10 != 0x00),
                 carry: .noneAffected
             )
         )
@@ -100,8 +106,8 @@ public enum ALU {
         let result = x &- y &- carry.toUInt8()
         let zeroFlag = result == 0
         let subtractFlag = true
-        let halfCarryFlag = (x & 0xF) &- (y & 0xF) &- carry.toUInt8() < 0xF
-        let carryFlag = UInt16(x) &- UInt16(y) &- carry.toUInt16() < 0xFF
+        let halfCarryFlag = ((x & 0x0F) &- (y & 0x0F) &- carry.toUInt8()) & 0x10 != 0x00
+        let carryFlag = UInt16(x) < UInt16(y) + UInt16(carry.toUInt8())
         return Result(
             value: result,
             flag: Flag(

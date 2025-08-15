@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Bool {
+public extension Bool {
     func toUInt8() -> UInt8 {
         return self ? 1 : 0
     }

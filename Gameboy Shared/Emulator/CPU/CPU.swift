@@ -27,10 +27,10 @@ public struct CPU {
     public var registerAF: Register
     public var registerBC: Register
     public var registerDE: Register
-    public var registerHL: Register
-    
+    public var registerHL: Register 
     public var interruptMasterEnabled: Bool = false
     public var interruptEnable: InterruptRegister = .init(value: 0x0)
+    public var enabled: Bool = true
     
     public var carryFlag: Bool {
         registerAF.lo.bit(4)
@@ -47,17 +47,50 @@ public struct CPU {
             cycleCounter -= 1
             return
         }
-        if handleInterrupt(readMemory: readMemory, writeMemory: writeMemory) {
-            return
-        }
+       
         let opcode = readMemory(programCounter)
-//        print(String(format: "%llx %llx", opcode, programCounter))
+//        if programCounter == 0xc6c9 {
+//            print("TEST")
+//        }
+//        if programCounter == 0xc246 {
+//            print("CHECKSUM INIT")
+//        }
+//        if programCounter == 0xc2b1 {
+//            print("CHECKSUM")
+//        }
+//        if programCounter == 0xc5de {
+//            print("FAILED 1")
+//        }
+//        if programCounter == 0xc5c2 {
+//            print("FAILED 2")
+//        }
+//        if programCounter == 0xc470 {
+//            print("FAILED 3")
+//        }
+        
+//        if programCounter == 0xC06A, opcode != 0xCB {
+//            print(" WH")
+//        }
+        
+        let printOpcode = if opcode == 0xCB {
+            readMemory(programCounter + 1)
+        } else {
+            opcode
+        }
+
+//        print(String(format: "%llx %llx", printOpcode, programCounter))
+//        if programCounter == 50741 {
+//            print("DD")
+//        }
         programCounter &+= 1
         let instructionBuilder = InstructionBuilder.instructions[opcode]
         if let instructionBuilder {
             let instruction = instructionBuilder.build(&self, readMemory, writeMemory)
             cycleCounter += ((instruction.cycles - 1) * 4) - 1
             instruction.perform(&self, readMemory, writeMemory)
+        }
+        if handleInterrupt(readMemory: readMemory, writeMemory: writeMemory) {
+            return
         }
     }
     
@@ -74,7 +107,6 @@ public struct CPU {
             programCounter = respondedInterrupt.address
             
             interruptFlag.unset(respondedInterrupt)
-            writeMemory(interruptFlag.value, 0xFF0F)
             interruptMasterEnabled = false
             writeMemory(interruptFlag.value, 0xFF0F)
             return true

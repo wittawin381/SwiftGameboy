@@ -9,6 +9,26 @@ import Testing
 import Gameboy
 
 struct GameboyTests {
+    @Test func numberOfOpcode() async throws {
+        let notExistOpcode = [0xD3, 0xDB, 0xDD, 0xE3, 0xE4, 0xEB, 0xEC, 0xED, 0xF4, 0xFC, 0xFD]
+        
+        for i in 0..<256 {
+            let instructionBuilder = InstructionBuilder.instructions[UInt8(i)]
+            if instructionBuilder == nil, !notExistOpcode.contains(i) {
+                print("\(String(format: "%02X", i))")
+            }
+        }
+        
+        for i in 0..<256 {
+            let instructionBuilder = InstructionBuilder.prefixInstruction[UInt8(i)]
+            if instructionBuilder == nil {
+                print("\(String(format: "%02X", i))")
+            }
+        }
+        
+        #expect(InstructionBuilder.instructions.count == 245)
+        #expect(InstructionBuilder.prefixInstruction.count == 256)
+    }
 
     @Test func opcode0x01() async throws {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.

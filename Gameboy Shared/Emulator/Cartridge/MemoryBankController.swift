@@ -20,7 +20,7 @@ protocol MemoryBankController {
     var ramEnabled: Bool { get set }
     
     mutating func write(_ value: UInt8, at address: UInt16)
-    func readAddress(for address: UInt16) -> UInt16
+    func readAddress(for address: UInt16) -> UInt32
 }
 
 struct MBCVersion1: MemoryBankController {
@@ -40,7 +40,7 @@ struct MBCVersion1: MemoryBankController {
         case advanced
     }
     
-    func readAddress(for address: UInt16) -> UInt16 {
+    func readAddress(for address: UInt16) -> UInt32 {
         switch address {
         /// fixed ROM bank 0 (read-only)
         case 0x0...0x3FFF:
@@ -50,12 +50,12 @@ struct MBCVersion1: MemoryBankController {
             case .advanced:
                 (UInt16(additionalRegister) * romBankOffset) + address
             }
-            return memoryAddress
+            return UInt32(memoryAddress)
         /// ROM bank 01-7F (read-only)
         case 0x4000...0x7FFF:
             let adjustedRomBankNumber = romBankNumberRegister == 0 ? 1 : romBankNumberRegister
-            let combinedRomBankNumber = (UInt16(additionalRegister) << 5) | UInt16(adjustedRomBankNumber)
-            let memoryAddress = (combinedRomBankNumber * romBankOffset) + address - 0x4000
+            let combinedRomBankNumber: UInt32 = (UInt32(additionalRegister) << 5) | UInt32(adjustedRomBankNumber)
+            let memoryAddress: UInt32 = UInt32((combinedRomBankNumber * UInt32(romBankOffset)) + UInt32(address) - 0x4000)
             return memoryAddress
         /// RAM bank
         case 0xA000...0xBFFF:
@@ -68,7 +68,7 @@ struct MBCVersion1: MemoryBankController {
             case .advanced:
                 UInt16(romSize) + (UInt16(additionalRegister) * ramBankOffset) + address
             }
-            return memoryAddress
+            return UInt32(memoryAddress)
         default: return 0xFF;
         }
     }
@@ -85,8 +85,12 @@ struct MBCVersion1: MemoryBankController {
             if romBankValue > romSize / 16 {
                 romBankValue &= UInt8((romSize / 16))
             }
-            return romBankNumberRegister = romBankValue
+            if romBankValue == 22 {
+                print("ROM EXCEED")
+            }
+//            return romBankNumberRegister = romBankValue
         case 0x4000...0x5FFF:
+            if romSize < 1024 * 1024 { return }
             return additionalRegister = value & 0x3
         case 0x6000...0x7FFF:
             return bankingMode = (value & 0x1) == 0 ? .simple : .advanced
