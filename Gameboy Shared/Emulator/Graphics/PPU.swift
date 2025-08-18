@@ -206,9 +206,26 @@ struct PPU  {
                 }
             }
             
-            if backgroundFIFO.count > 8, let firstPixel = backgroundFIFO.popFirst() {
+//            if backgroundFIFO.count > 8, let firstPixel = backgroundFIFO.popFirst() {
+//                let backgroundPixel = firstPixel
+//                if let sprite = spritesBuffer.first {
+//                    
+//                }
+//                frameBuffer.value[Int(pixelY) * 160 + Int(pixelX)] = firstPixel
+//                pixelX += 1
+//            }
+            
+            if backgroundFIFO.count > 8 {
+                if let sprite = spritesBuffer.first {
+                    switch sprite.attribute.priority {
+                    case .sprite:
+                        frameBuffer.value[Int(pixelY) * 160 + Int(pixelX)] = sprite.attribute.
+                    case .background:
+                        <#code#>
+                    }
+                }
                 let backgroundPixel = firstPixel
-                if let spritePixel = spriteFIFO.first {
+                if let sprite = spritesBuffer.first {
                     
                 }
                 frameBuffer.value[Int(pixelY) * 160 + Int(pixelX)] = firstPixel

@@ -41,13 +41,21 @@ class Renderer: NSObject, MTKViewDelegate {
         Task {
             while true {
                 cycleCount += 1
+                guard frameCount == 0 else { continue }
                 let action = gameboy.run()
                 switch action {
                 case .idle:
                     break
                 case .drawFrame(let frameBuffer):
                     self.frameBuffer = frameBuffer
-//                    print(Date.now.timeIntervalSince1970)
+                    frameCount += 1
+                    if frameCount == 1 {
+//                        print("START", CACurrentMediaTime())
+                    }
+                    if frameCount == 60 {
+//                        print("END", CACurrentMediaTime())
+                        frameCount = 0
+                    }
                 }
             }
         }
@@ -133,8 +141,10 @@ class Renderer: NSObject, MTKViewDelegate {
         
         //TODO: wait = gameboy clock
 //        _ = inFlightSemaphore.wait(timeout: DispatchTime.distantFuture)
-//        guard frameDraw > 0 else { return }
-//        frameDraw -= 1
+        guard frameCount > 0 else { return }
+        frameCount -= 1
+        
+//        print("START", Date.now.timeIntervalSince1970)
         if let commandBuffer = commandQueue.makeCommandBuffer() {
             
 //            let semaphore = inFlightSemaphore

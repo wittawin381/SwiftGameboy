@@ -164,7 +164,7 @@ public extension InstructionBuilder {
         // MARK: - 0x01
         /// LD rr 16 bit
         /// TODO: - correctly implement STOP
-        0x10: InstructionBuilder(cycles: 3) { cpu, readMemory, writeMemory in
+        0x10: InstructionBuilder(cycles: 1) { cpu, readMemory, writeMemory in
             cpu.programCounter += 1
         },
         /// LD rr 16 bit
@@ -453,7 +453,7 @@ public extension InstructionBuilder {
             cpu.updateFlag(result.flag)
         },
         /// LD (HL)
-        0x36: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
+        0x36: InstructionBuilder(cycles: 3) { cpu, readMemory, writeMemory in
             let value = readMemory(cpu.programCounter)
             cpu.programCounter += 1
             writeMemory(value, cpu.registerHL.all)
@@ -689,11 +689,11 @@ public extension InstructionBuilder {
             cpu.registerHL.hi = cpu.registerHL.lo
         },
         /// LD r, (HL) Load to the 8-bit register r, data from the absolute address specified by the 16-bit register HL.
-        0x66: InstructionBuilder(cycles: 1) { cpu, readMemory, writeMemory in
+        0x66: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
             cpu.registerHL.hi = readMemory(cpu.registerHL.all)
         },
         /// LDrr`
-        0x67: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
+        0x67: InstructionBuilder(cycles: 1) { cpu, readMemory, writeMemory in
             cpu.registerHL.hi = cpu.registerAF.hi
         },
         /// LDrr`
@@ -756,7 +756,7 @@ public extension InstructionBuilder {
         },
         /// TODO: implement correct HALT instruction
         0x76: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
-            cpu.enabled = false
+            cpu.isHalted = true
         },
         //LD (HL), r Load to the absolute address specified by the 16-bit register HL, data from the 8-bit register r.
         0x77: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -833,7 +833,7 @@ public extension InstructionBuilder {
             cpu.updateFlag(result.flag)
         },
         /// ADD r
-        0x86: InstructionBuilder(cycles: 1) { cpu, readMemory, writeMemory in
+        0x86: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
             let value = readMemory(cpu.registerHL.all)
             let result = ALU.add(cpu.registerAF.hi, value)
             cpu.registerAF.hi = result.value
@@ -1322,6 +1322,7 @@ public extension InstructionBuilder {
             cpu.programCounter += 1
             if let instruction = prefixInstruction[opcode]?.build(&cpu, readMemory, writeMemory) {
                 return instruction
+//                return Instruction(cycles: instruction.cycles + 1, perform: instruction.perform)
             } else {
                 fatalError("opcode : \(opcode) hasn't been implemented")
             }
@@ -1708,7 +1709,7 @@ public extension InstructionBuilder {
         },
         /// DI
         0xFB: InstructionBuilder(cycles: 1) { cpu, readMemory, writeMemory in
-            cpu.interruptMasterEnabled = true
+            cpu.isInterruptMasterEnabledRequest = true
         },
         /// CP n
         0xFE: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
@@ -2358,7 +2359,7 @@ public extension InstructionBuilder {
             cpu.updateFlag(flag)
         },
         /// SRA HL
-        0x2E: InstructionBuilder(cycles: 2) { cpu, readMemory, writeMemory in
+        0x2E: InstructionBuilder(cycles: 4) { cpu, readMemory, writeMemory in
             let value = readMemory(cpu.registerHL.all)
             let bit7 = value.bit(7)
             let bit0 = value.bit(0)

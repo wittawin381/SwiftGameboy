@@ -12,14 +12,20 @@ struct IORegisters {
     var ppu: PPU = PPU()
     var joypadState: JoypadState = JoypadState()
     var interruptsFlag: InterruptRegister = InterruptRegister(value: 0x0)
-    var divider: UInt8 = 0x0
+    
+    var systemCounter = SystemCounter()
+    var divider: UInt8 {
+        get { UInt8(systemCounter.value >> 8) & 0xFF }
+    }
+    
     var timerCounter: UInt8 = 0x0
     var timerModulo: UInt8 = 0x0
     var timerControl: TimerControl = .init(value: 0x0)
-    var dividerCycleCounter: Int = 0x0
     var timerCycleCounter: Int = 0x0
     
     var serialTransferData: UInt8 = 0x0
+    
+    var isInterruptPending: Bool = false
     
     struct TimerControl {
         var value: UInt8 {
@@ -36,6 +42,16 @@ struct IORegisters {
             }
         }
         
+        var clockModeBit: UInt8 {
+            switch value & 0b00000011 {
+                case 0: 9
+                case 1: 3
+                case 2: 5
+                case 3: 7
+                default: 0
+            }
+        }
+        
         /// clock rate in T cycle = M cycle * 4
         var tickAtCycle: Int = 0
         
@@ -47,10 +63,9 @@ struct IORegisters {
         case 0xFF01:
             serialTransferData = value
         case 0xFF02:
-//            print(serialTransferData)
             break
         case 0xFF04:
-            divider = 0
+            systemCounter.value = 0
         case 0xFF05:
             timerCounter = value
             timerCycleCounter = 0
@@ -58,7 +73,6 @@ struct IORegisters {
             timerModulo = value
         case 0xFF07:
             timerControl.value = value
-            timerCycleCounter = 0
         case 0xFF00:
             joypadState.write(value & 0xF0 | joypadState.value & 0x0F)
         case 0xFF0F:
@@ -78,8 +92,6 @@ struct IORegisters {
             joypadState.read()
         case 0xFF01:
             serialTransferData
-//        case 0xFF02:
-//            
         case 0xFF04:
             divider
         case 0xFF05:
@@ -98,25 +110,44 @@ struct IORegisters {
     }
     
     mutating func advance() {
-        dividerCycleCounter &+= 1
-        if dividerCycleCounter == 16384 {
-            divider &+= 1
-            dividerCycleCounter = 0
+        if isInterruptPending {
+            if timerCycleCounter < 4 {
+                timerCycleCounter &+= 1
+            } else {
+                timerCycleCounter = 0
+                interruptsFlag.set(.timer)
+                isInterruptPending = false
+            }
         }
+        let isTick = systemCounter.clock(selectedBit: timerControl.clockModeBit)
         
         if timerControl.isEnable {
             timerCycleCounter &+= 1
-            if timerCycleCounter >= timerControl.tickAtCycle {
+            if isTick {
                 let result = timerCounter.addingReportingOverflow(1)
                 if result.overflow {
                     timerCounter = timerModulo
-                    interruptsFlag.set(.timer)
+                    isInterruptPending = true
                 } else {
                     timerCounter = result.partialValue
                 }
-                timerCycleCounter = 0
             }
         }
+    }
+}
+
+struct SystemCounter {
+    var value: UInt16 = 0x0
+    
+    private var _selectedBit: UInt8 = 0x0
+    
+    mutating func clock(selectedBit index: UInt8) -> Bool {
+        if value.bit(index) == true, (value &+ 1).bit(index) == false {
+            value &+= 1
+            return true
+        }
+        value &+= 1
+        return false
     }
 }
 

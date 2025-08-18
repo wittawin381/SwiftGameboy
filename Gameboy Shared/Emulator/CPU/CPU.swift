@@ -30,7 +30,8 @@ public struct CPU {
     public var registerHL: Register 
     public var interruptMasterEnabled: Bool = false
     public var interruptEnable: InterruptRegister = .init(value: 0x0)
-    public var enabled: Bool = true
+    public var isInterruptMasterEnabledRequest: Bool = false
+    public var isHalted: Bool = false
     
     public var carryFlag: Bool {
         registerAF.lo.bit(4)
@@ -42,63 +43,58 @@ public struct CPU {
     
     public var cycleCounter: Int = 0
     
+    public var pendingInstruction: Instruction?
+    
+    var tickCountEnabled: Bool = false
+    var tickCount: Int = 0
+    
     mutating func advance(readMemory: (UInt16) -> UInt8, writeMemory: (UInt8, UInt16) -> Void) {
-        if cycleCounter > 0 {
-            cycleCounter -= 1
+        cycleCounter += 1
+        if let pendingInstruction{
+            if cycleCounter > (pendingInstruction.cycles * 4) - 1 {
+                pendingInstruction.perform(&self, readMemory, writeMemory)
+                cycleCounter = 0
+                self.pendingInstruction = nil
+            }
             return
-        }
-       
-        let opcode = readMemory(programCounter)
-//        if programCounter == 0xc6c9 {
-//            print("TEST")
-//        }
-//        if programCounter == 0xc246 {
-//            print("CHECKSUM INIT")
-//        }
-//        if programCounter == 0xc2b1 {
-//            print("CHECKSUM")
-//        }
-//        if programCounter == 0xc5de {
-//            print("FAILED 1")
-//        }
-//        if programCounter == 0xc5c2 {
-//            print("FAILED 2")
-//        }
-//        if programCounter == 0xc470 {
-//            print("FAILED 3")
-//        }
-        
-//        if programCounter == 0xC06A, opcode != 0xCB {
-//            print(" WH")
-//        }
-        
-        let printOpcode = if opcode == 0xCB {
-            readMemory(programCounter + 1)
         } else {
-            opcode
-        }
-
-//        print(String(format: "%llx %llx", printOpcode, programCounter))
-//        if programCounter == 50741 {
-//            print("DD")
-//        }
-        programCounter &+= 1
-        let instructionBuilder = InstructionBuilder.instructions[opcode]
-        if let instructionBuilder {
-            let instruction = instructionBuilder.build(&self, readMemory, writeMemory)
-            cycleCounter += ((instruction.cycles - 1) * 4) - 1
-            instruction.perform(&self, readMemory, writeMemory)
-        }
-        if handleInterrupt(readMemory: readMemory, writeMemory: writeMemory) {
-            return
+            if isInterruptMasterEnabledRequest {
+                interruptMasterEnabled = true
+                isInterruptMasterEnabledRequest = false
+            }
+            
+            handleInterrupt(readMemory: readMemory, writeMemory: writeMemory)
+            
+            if !isHalted {
+                
+                let opcode = readMemory(programCounter)
+                
+    //                    let printOpcode = if opcode == 0xCB {
+    //                        readMemory(programCounter + 1)
+    //                    } else {
+    //                        opcode
+    //                    }
+                
+                programCounter &+= 1
+                let instructionBuilder = InstructionBuilder.instructions[opcode]
+                if let instructionBuilder {
+                    let instruction = instructionBuilder.build(&self, readMemory, writeMemory)
+                    cycleCounter = 1
+                    pendingInstruction = instruction
+                }
+            }
         }
     }
     
-    public mutating func handleInterrupt(readMemory: (UInt16) -> UInt8, writeMemory: (UInt8, UInt16) -> Void) -> Bool {
-        guard interruptMasterEnabled else { return false }
-        
+    public mutating func handleInterrupt(readMemory: (UInt16) -> UInt8, writeMemory: (UInt8, UInt16) -> Void) {
         var interruptFlag = InterruptRegister(value: readMemory(0xFF0F))
         
+        if interruptEnable.value & interruptFlag.value != 0 {
+            isHalted = false
+        }
+
+        guard interruptMasterEnabled else { return }
+                
         if let respondedInterrupt = interruptFlag.findFirstRespondedInterrupt(using: interruptEnable){
             stackPointer -= 1
             writeMemory(UInt8(programCounter >> 8), stackPointer)
@@ -109,9 +105,7 @@ public struct CPU {
             interruptFlag.unset(respondedInterrupt)
             interruptMasterEnabled = false
             writeMemory(interruptFlag.value, 0xFF0F)
-            return true
         }
-        return false
     }
     
     public mutating func updateFlag(_ flag: ALU.Flag) {

@@ -68,14 +68,6 @@ struct Device {
                 
             }
             writeMemory: { value, address in
-                if address == 0xC06A, value != 0xCB {
-                    print("WRITE HERER")
-                }
-                /// step 1
-                /// 24 c5ad
-               /// SET HL : 218 195
-               /// SET AF : 198
-               /// e0 c5ae
                 switch address {
                 case 0x0...0x7FFF:
                     return cartridge.memoryBankController.write(value, at: address)
@@ -111,70 +103,4 @@ struct Device {
                 }
             })
     }
-}
-
-extension Device {
-    mutating func keyEvent(_ event: KeyEvent) {
-        switch event {
-        case let .keyUp(joypadKey):
-            switch joypadKey {
-            case .UP:
-                ioRegisters.joypadState.up = true
-            case .DOWN:
-                ioRegisters.joypadState.down = true
-            case .LEFT:
-                ioRegisters.joypadState.left = true
-            case .RIGHT:
-                ioRegisters.joypadState.right = true
-            case .A:
-                ioRegisters.joypadState.a = true
-            case .B:
-                ioRegisters.joypadState.b = true
-            case .START:
-                ioRegisters.joypadState.start = true
-            case .SELECT:
-                ioRegisters.joypadState.select = true
-            }
-        case let .keyDown(joypadKey):
-            switch joypadKey {
-            case .UP:
-                ioRegisters.joypadState.up = false
-            case .DOWN:
-                ioRegisters.joypadState.down = false
-            case .LEFT:
-                ioRegisters.joypadState.left = false
-            case .RIGHT:
-                ioRegisters.joypadState.right = false
-            case .A:
-                ioRegisters.joypadState.a = false
-            case .B:
-                ioRegisters.joypadState.b = false
-            case .START:
-                ioRegisters.joypadState.start = false
-            case .SELECT:
-                ioRegisters.joypadState.select = false
-            }
-        }
-    }
-}
-
-enum KeyEvent {
-    case keyUp(JoypadKey)
-    case keyDown(JoypadKey)
-}
-
-enum JoypadKey {
-    case UP
-    case DOWN
-    case LEFT
-    case RIGHT
-    case A
-    case B
-    case START
-    case SELECT
-}
-
-
-protocol GBJoypadKeyRepresentable {
-    var joypadKey: JoypadKey { get }
 }

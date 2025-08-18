@@ -21,7 +21,7 @@ class GameViewController: NSViewController {
             print("View attached to GameViewController is not an MTKView")
             return
         }
-        mtkView.preferredFramesPerSecond = 60
+//        mtkView.preferredFramesPerSecond = 60
 
         // Select the device to render with.  We choose the default device
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
@@ -31,7 +31,7 @@ class GameViewController: NSViewController {
 
         mtkView.device = defaultDevice
 
-        guard let cartridge = try? Emulator().loadRom("02-interrupts.gb") else { return }
+        guard let cartridge = try? Emulator().loadRom("Tetris.gb") else { return }
         
         guard let bootRom = try? Emulator().loadBootRom("dmg_boot.bin") else { return }
 
