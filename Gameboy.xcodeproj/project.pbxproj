@@ -77,11 +77,6 @@
 				Roms/cpu_instrs.gb,
 				Roms/dmg_boot.bin,
 				Roms/instr_timing.gb,
-				"Roms/Kirby's Dream Land (USA, Europe).gb",
-				"Roms/Kirby's Dream Land 2.gb",
-				Roms/opus5.gb,
-				Roms/testris.gb,
-				Roms/Tetris.gb,
 				Shaders.metal,
 			);
 			target = 25B08F1E2E1422C400BB39AF /* Gameboy iOS */;
@@ -106,11 +101,6 @@
 				Roms/cpu_instrs.gb,
 				Roms/dmg_boot.bin,
 				Roms/instr_timing.gb,
-				"Roms/Kirby's Dream Land (USA, Europe).gb",
-				"Roms/Kirby's Dream Land 2.gb",
-				Roms/opus5.gb,
-				Roms/testris.gb,
-				Roms/Tetris.gb,
 				Shaders.metal,
 			);
 			target = 25B08F2F2E1422C400BB39AF /* Gameboy tvOS */;
@@ -156,11 +146,6 @@
 				Roms/cpu_instrs.gb,
 				Roms/dmg_boot.bin,
 				Roms/instr_timing.gb,
-				"Roms/Kirby's Dream Land (USA, Europe).gb",
-				"Roms/Kirby's Dream Land 2.gb",
-				Roms/opus5.gb,
-				Roms/testris.gb,
-				Roms/Tetris.gb,
 				Shaders.metal,
 			);
 			target = 25B08F3F2E1422C400BB39AF /* Gameboy macOS */;
