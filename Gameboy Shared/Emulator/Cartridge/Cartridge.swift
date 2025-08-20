@@ -23,7 +23,7 @@ struct Cartridge {
         let ramSize = data[0x149]
         
         switch cartridgeType {
-        case 0x00, 0x01:
+        case 0x00, 0x01, 0x2, 0x3:
             self.memoryBankController = MBCVersion1(
                 romSize: romSize,
                 ramSize: ramSize
@@ -38,8 +38,8 @@ struct Cartridge {
     }
     
     func readValue(at address: UInt16) -> UInt8 {
-//        let mappedAddress = memoryBankController.readAddress(for: address)
-//        return data[Int(mappedAddress)]
-        return data[address]
+        let mappedAddress = memoryBankController.readAddress(for: address)
+        return data[Int(mappedAddress)]
+//        return data[address]
     }
 }

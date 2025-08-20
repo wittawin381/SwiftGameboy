@@ -15,7 +15,6 @@ struct PPU  {
     }
     
     typealias InterruptRequestHandler = (InterruptType) -> Void
-    typealias DrawHandler = (FrameBuffer) -> Void
     
     /// dot cycle : 1 cycle = one of 4 MHz cpu cycle 4 dots = 1 M cycle
     var cycleCounter: UInt16 = 0
@@ -94,8 +93,8 @@ struct PPU  {
     }
     
     var fetchType: FetchType = .background
-    var backgroundFIFO: Deque<UInt8> = []
-    var spriteFIFO: Deque<UInt8> = []
+    var backgroundFIFO: Deque<PixelData> = []
+    var spriteFIFO: Deque<PixelData> = []
     var spritesBuffer: Deque<Sprite> = []
     var windowInternalXCounter: UInt8 = 0
     var windowInternalLineCounter: UInt8 = 0
@@ -172,6 +171,7 @@ struct PPU  {
     
     mutating func advance(
         vRam: [UInt8],
+        oam: [UInt8],
         interruptRequestHandler: InterruptRequestHandler,
     ) -> AdvanceAction {
         if !lcdControl.lcdDisplayEnabled { return .idle }
@@ -185,7 +185,7 @@ struct PPU  {
                     windowYCondition = wy == lcdY
                 }
                 
-                spritesBuffer = scanSpriteAttributes(atLine: lcdY, fromVram: vRam)
+                spritesBuffer = scanSpriteAttributes(atLine: lcdY, fromOAM: oam)
                 ppuMode = .mode2(cycleCounter: cycleCounter + 1)
                 return .idle
             }
@@ -206,30 +206,22 @@ struct PPU  {
                 }
             }
             
-//            if backgroundFIFO.count > 8, let firstPixel = backgroundFIFO.popFirst() {
-//                let backgroundPixel = firstPixel
-//                if let sprite = spritesBuffer.first {
-//                    
-//                }
-//                frameBuffer.value[Int(pixelY) * 160 + Int(pixelX)] = firstPixel
-//                pixelX += 1
-//            }
-            
-            if backgroundFIFO.count > 8 {
-                if let sprite = spritesBuffer.first {
-                    switch sprite.attribute.priority {
-                    case .sprite:
-                        frameBuffer.value[Int(pixelY) * 160 + Int(pixelX)] = sprite.attribute.
-                    case .background:
-                        <#code#>
+            if backgroundFIFO.count > 8, let backgroundPixel = backgroundFIFO.first {
+                if case .background = fetchType {
+                    if spriteFIFO.count != 0 {
+                        for i in 0..<spriteFIFO.count {
+                            if !(spriteFIFO[i].color == 0 || (spriteFIFO[i].backgroundPriority == 1 && backgroundPixel.color != 0)) {
+                                if backgroundFIFO.count > i {
+                                    backgroundFIFO[i] = spriteFIFO[i]
+                                }
+                            }
+                        }
+                        spriteFIFO = []
                     }
+                    frameBuffer.value[Int(pixelY) * 160 + Int(pixelX)] = backgroundFIFO.first!.color
+                    backgroundFIFO.removeFirst()
+                    pixelX += 1
                 }
-                let backgroundPixel = firstPixel
-                if let sprite = spritesBuffer.first {
-                    
-                }
-                frameBuffer.value[Int(pixelY) * 160 + Int(pixelX)] = firstPixel
-                pixelX += 1
             }
             
             if pixelX > 159 {
@@ -237,6 +229,7 @@ struct PPU  {
                 pixelY += 1
                 backgroundFIFO = []
                 spriteFIFO = []
+                spritesBuffer = []
                 windowXCondition = false
                 ppuMode = .mode0(cycleCounter: cycleCounter + 1)
                 return .idle
@@ -247,6 +240,16 @@ struct PPU  {
                 windowInternalLineCounter += 1
             }
             
+            if case .background = fetchType {
+                if let spriteIndex = spritesBuffer.firstIndex(where: { sprite in sprite.position.x <= pixelX + 8 }), lcdControl.spriteEnabled {
+                    fetchType = .sprite(spritesBuffer[spriteIndex])
+                    pixelFetcher.save()
+                    pixelFetcher.reset()
+                    spritesBuffer.remove(at: spriteIndex)
+                }
+            }
+            
+            
             let action = pixelFetcher.advance(delegate: makePixelFetcherDelegate(vRamDataProvider: { vRam[$0] }))
             
             switch action {
@@ -254,12 +257,21 @@ struct PPU  {
                 break;
             case .incrementXCounter:
                 if isWindowDisplayOnScanline {
-                    windowInternalXCounter += 1
+                    windowInternalXCounter &+= 1
                 }
                 break
-            case let .pushPixelRow(pixels):
-                if backgroundFIFO.count <= 8 {
+            case var .pushPixelRow(pixels):
+                switch fetchType {
+                case .background:
                     backgroundFIFO.append(contentsOf: pixels)
+                case let .sprite(sprite):
+                    if sprite.position.x < 8 {
+                        let shiftedOutPixelCount = 8 - sprite.position.x
+                        pixels.removeFirst(Int(shiftedOutPixelCount))
+                    }
+                    spriteFIFO.append(contentsOf: pixels)
+                    pixelFetcher.restore()
+                    fetchType = .background
                 }
             }
             ppuMode = .mode3(cycleCounter: cycleCounter + 1, pixelFetcher: pixelFetcher)
@@ -285,6 +297,8 @@ struct PPU  {
                     windowXCondition = false
                     windowYCondition = false
                     backgroundFIFO = []
+                    spriteFIFO = []
+                    spritesBuffer = []
                     windowInternalXCounter = 0
                     windowInternalLineCounter = 0
                     lcdY = 0
@@ -339,7 +353,8 @@ struct PPU  {
             }
         case let .sprite(sprite):
             SpritePixelFetcherDelegate(
-                tileNumber: sprite.tileNumber,
+                lcdY: lcdY,
+                sprite: sprite,
                 tileDataArea: 0x8000,
                 tileNumberProvider: { vRamDataProvider($0) },
                 vRamDataProvider: { vRamDataProvider($0) }
@@ -347,49 +362,19 @@ struct PPU  {
         }
     }
     
-//    private func fetchSpritePixel(atLine line: UInt8, fromVram vRam: [UInt8], fetcherX: UInt8) -> [PixelData]? {
-//        let sprites = scanSpriteAttributes(atLine: line, fromVram: vRam)
-//        
-//        var spriteBuffers: [(UInt8, Sprite)] = []
-//        for sprite in sprites {
-//            if sprite.position.x <= fetcherX + 8 {
-//                let tileNumber = sprite.tileNumber
-//                let tileDataLow = vRam[0x8000 + Int(tileNumber) * 16]
-//                let tileDataHigh = vRam[0x8000 + 1 + (Int(tileNumber) * 16)]
-//                
-//                let pixelIndexAtTile = UInt8(fetcherX) % 8
-//                let pixelDataLow = tileDataLow.bit(pixelIndexAtTile).toUInt8()
-//                let pixelDataHigh = tileDataHigh.bit(pixelIndexAtTile).toUInt8()
-//                let color = pixelDataHigh << 1 | pixelDataLow
-//                
-//        
-//                spriteBuffers.append((color, sprite))
-//            }
-//        }
-//        let sortedSprite = spriteBuffers.sorted(by: { $0.1.tileNumber < $1.1.tileNumber })
-//        if let firstSprite = sortedSprite.first {
-//            return PixelData(color: firstSprite.0,
-//                             palette: firstSprite.1.attribute.palette.rawValue,
-//                             spritePrioriy: 0,
-//                             backgroundPriority: firstSprite.1.attribute.priority.rawValue)
-//        } else {
-//            return nil
-//        }
-//    }
-    
-    private func scanSpriteAttributes(atLine line: UInt8, fromVram vRam: [UInt8]) -> Deque<Sprite> {
+    private func scanSpriteAttributes(atLine line: UInt8, fromOAM oam: [UInt8]) -> Deque<Sprite> {
         var currentAddress: UInt16 = 0xFE00
         var buffer: Deque<Sprite> = []
         while buffer.count <= 10, currentAddress <= 0xFE9F {
-            let yPosition = vRam[currentAddress, offset: 0xFE00]
-            let xPosition = vRam[currentAddress + 1, offset: 0xFE00]
-            let tileNumber = vRam[currentAddress + 2, offset: 0xFE00]
-            let attributes = vRam[currentAddress + 3, offset: 0xFE00]
+            let yPosition = oam[currentAddress, offset: 0xFE00]
+            let xPosition = oam[currentAddress + 1, offset: 0xFE00]
+            let tileNumber = oam[currentAddress + 2, offset: 0xFE00]
+            let attributes = oam[currentAddress + 3, offset: 0xFE00]
             let spriteHeight: UInt8 = if lcdControl.spriteSize == 0 { 8 } else { 16 }
             
             if xPosition > 0,
-               lcdY + 16 > yPosition,
-               lcdY + 16 < yPosition + spriteHeight {
+               line + 16 >= yPosition,
+               line + 16 < yPosition + spriteHeight {
                 let sprite = Sprite(
                     position: Sprite.Position(x: xPosition, y: yPosition),
                     tileNumber: tileNumber,
@@ -452,9 +437,9 @@ extension PPU {
     
     struct Sprite {
         enum Priority: UInt8 {
-            case sprite
+            case sprite = 0
             /// background  color 1-3 overlay sprite if color 0 then sprite above
-            case background
+            case background = 1
         }
         
         enum Palette: UInt8 {

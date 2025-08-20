@@ -88,7 +88,7 @@ struct MBCVersion1: MemoryBankController {
             if romBankValue == 22 {
                 print("ROM EXCEED")
             }
-//            return romBankNumberRegister = romBankValue
+            return romBankNumberRegister = romBankValue
         case 0x4000...0x5FFF:
             if romSize < 1024 * 1024 { return }
             return additionalRegister = value & 0x3

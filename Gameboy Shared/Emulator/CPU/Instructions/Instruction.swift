@@ -475,7 +475,7 @@ public extension InstructionBuilder {
             if cpu.carryFlag {
                 return Instruction(cycles: 3) { cpu, readMemory, writeMemory in
                     let signedValue = Int8(bitPattern: value)
-                    cpu.programCounter += UInt16(bitPattern: Int16(signedValue))
+                    cpu.programCounter &+= UInt16(bitPattern: Int16(signedValue))
                 }
             } else {
                 return Instruction(cycles: 2) { _, _, _ in }
