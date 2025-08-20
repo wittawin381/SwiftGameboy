@@ -1678,8 +1678,8 @@
             filePath = "Gameboy Shared/Emulator/Graphics/PPU.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "274"
-            endingLineNumber = "274"
+            startingLineNumber = "281"
+            endingLineNumber = "281"
             landmarkName = "advance(vRam:oam:interruptRequestHandler:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1825,6 +1825,22 @@
             startingLineNumber = "290"
             endingLineNumber = "290"
             landmarkName = "pixelFetcherTileDataOffset()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "CD88E016-A5D4-4EA9-9F2A-A2206D7699FC"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Gameboy Shared/Emulator/Graphics/PPU.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "342"
+            endingLineNumber = "342"
+            landmarkName = "makePixelFetcherDelegate(vRamDataProvider:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

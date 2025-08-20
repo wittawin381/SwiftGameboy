@@ -97,7 +97,7 @@ struct PPU  {
     var spriteFIFO: Deque<PixelData> = []
     var spritesBuffer: Deque<Sprite> = []
     var windowInternalXCounter: UInt8 = 0
-    var windowInternalLineCounter: UInt8 = 0
+    var windowInternalLineCounter: UInt8 = 255
     var windowYCondition: Bool = false
     var windowXCondition: Bool = false
     var isWindowDisplayOnScanline: Bool {
@@ -230,15 +230,13 @@ struct PPU  {
                 backgroundFIFO = []
                 spriteFIFO = []
                 spritesBuffer = []
+                windowInternalXCounter = 0
                 windowXCondition = false
                 ppuMode = .mode0(cycleCounter: cycleCounter + 1)
                 return .idle
             }
             
-            if pixelX >= wx, !windowXCondition {
-                windowXCondition = true
-                windowInternalLineCounter += 1
-            }
+            
             
             if case .background = fetchType {
                 if let spriteIndex = spritesBuffer.firstIndex(where: { sprite in sprite.position.x <= pixelX + 8 }), lcdControl.spriteEnabled {
@@ -249,6 +247,15 @@ struct PPU  {
                 }
             }
             
+            if pixelX >= wx, !windowXCondition {
+                windowXCondition = true
+                
+                if isWindowDisplayOnScanline {
+                    backgroundFIFO = []
+                    pixelFetcher.reset()
+                    windowInternalLineCounter &+= 1
+                }
+            }
             
             let action = pixelFetcher.advance(delegate: makePixelFetcherDelegate(vRamDataProvider: { vRam[$0] }))
             
@@ -256,14 +263,14 @@ struct PPU  {
             case .idle:
                 break;
             case .incrementXCounter:
-                if isWindowDisplayOnScanline {
-                    windowInternalXCounter &+= 1
-                }
                 break
             case var .pushPixelRow(pixels):
                 switch fetchType {
                 case .background:
                     backgroundFIFO.append(contentsOf: pixels)
+                    if isWindowDisplayOnScanline {
+                        windowInternalXCounter &+= 1
+                    }
                 case let .sprite(sprite):
                     if sprite.position.x < 8 {
                         let shiftedOutPixelCount = 8 - sprite.position.x
@@ -300,7 +307,7 @@ struct PPU  {
                     spriteFIFO = []
                     spritesBuffer = []
                     windowInternalXCounter = 0
-                    windowInternalLineCounter = 0
+                    windowInternalLineCounter = 255
                     lcdY = 0
                     pixelX = 0
                     pixelY = 0
