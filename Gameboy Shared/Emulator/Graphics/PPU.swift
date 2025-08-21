@@ -32,7 +32,11 @@ struct PPU  {
     /// LCD Y coordinate means y position or current line which is about to be drawn
     /// value from 0 - 155 -> 0 - 144 for normal line > 144 - 153 means VBlank period
     /// 0xFF44
-    var lcdY: UInt8 = 0
+    var lcdY: UInt8 = 0 {
+        didSet {
+            lcdStatus.lcdYCompareEqual = lcdY == lcdYCompare
+        }
+    }
     /// if lcdYCompare = lcdY flag in state register is set
     /// 0xFF45
     var lcdYCompare: UInt8 = 0
@@ -113,7 +117,7 @@ struct PPU  {
         case 0xFF40:
             lcdControl = .init(value)
         case 0xFF41:
-            lcdStatus.value = value & 0b1111_1100 | lcdStatus.value & 0b0000_0011
+            lcdStatus.value = value & 0b0111_1000 | lcdStatus.value & 0b0000_0111
         case 0xFF42:
             scy = value
         case 0xFF43:
@@ -121,7 +125,7 @@ struct PPU  {
         case 0xFF44:
             fatalError("LY is Read Only")
         case 0xFF45:
-            lcdYCompare = value & 0x99
+            lcdYCompare = value
         case 0xFF47:
             backgroundPalette = ColorPaletteRegister(value: value)
         case 0xFF48:
@@ -489,7 +493,7 @@ extension PPU {
         
         var ppuMode: UInt8 {
             get { value & 0b0000_0011 }
-            set { value = (value & 0b1111_1100) | (newValue & 0b0000_0011) }
+            set { value = (value & 0b0111_1100) | (newValue & 0b0000_0011) }
         }
         
         var lcdYCompareEqual: Bool {

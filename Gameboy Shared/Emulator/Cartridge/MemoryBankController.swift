@@ -9,7 +9,7 @@ import Foundation
 
 protocol MemoryBankController {
     var romSize: Int { get }
-    var ramSize: UInt8 { get }
+    var ramSize: UInt32 { get }
     
     /// ram bank register is actually 2 bit register
     var additionalRegister: UInt8 { get set }
@@ -19,13 +19,25 @@ protocol MemoryBankController {
     
     var ramEnabled: Bool { get set }
     
-    mutating func write(_ value: UInt8, at address: UInt16)
-    func readAddress(for address: UInt16) -> UInt32
+    mutating func write(_ value: UInt8, at address: UInt16) -> MemoryBankControllerWriteAction
+    func readAddress(for address: UInt16) -> MemoryBankControllerAddress
+}
+
+enum MemoryBankControllerWriteAction {
+    case writeInternal
+    case writeToRam(value: UInt8, address: UInt32)
+}
+
+enum MemoryBankControllerAddress {
+    case rom(address: UInt32)
+    case ram(address: UInt32)
+    case trash
 }
 
 struct MBCVersion1: MemoryBankController {
+    let numberOfRomBanks: UInt16
     let romSize: Int
-    let ramSize: UInt8
+    let ramSize: UInt32
     
     var additionalRegister: UInt8 = 0
     var bankingMode: BankingMode = .simple
@@ -40,62 +52,118 @@ struct MBCVersion1: MemoryBankController {
         case advanced
     }
     
-    func readAddress(for address: UInt16) -> UInt32 {
-        switch address {
-        /// fixed ROM bank 0 (read-only)
-        case 0x0...0x3FFF:
-            let memoryAddress = switch bankingMode {
-            case .simple:
-                address
-            case .advanced:
-                (UInt16(additionalRegister) * romBankOffset) + address
-            }
-            return UInt32(memoryAddress)
-        /// ROM bank 01-7F (read-only)
-        case 0x4000...0x7FFF:
-            let adjustedRomBankNumber = romBankNumberRegister == 0 ? 1 : romBankNumberRegister
-            let combinedRomBankNumber: UInt32 = (UInt32(additionalRegister) << 5) | UInt32(adjustedRomBankNumber)
-            let memoryAddress: UInt32 = UInt32((combinedRomBankNumber * UInt32(romBankOffset)) + UInt32(address) - 0x4000)
-            return memoryAddress
-        /// RAM bank
-        case 0xA000...0xBFFF:
-            if !ramEnabled {
-                return 0xFF
-            }
-            let memoryAddress = switch bankingMode {
-            case .simple:
-                address
-            case .advanced:
-                UInt16(romSize) + (UInt16(additionalRegister) * ramBankOffset) + address
-            }
-            return UInt32(memoryAddress)
-        default: return 0xFF;
+    var bitmask: UInt8 {
+        switch numberOfRomBanks {
+        case 2: 0b00000001
+        case 4: 0b00000011
+        case 8: 0b00000111
+        case 16: 0b00001111
+        case 32, 64, 128: 0b00011111
+        default: 0b00000001
         }
     }
     
-    mutating func write(_ value: UInt8, at address: UInt16) {
+    func readAddress(for address: UInt16) -> MemoryBankControllerAddress {
+        switch address {
+        /// fixed ROM bank 0 (read-only)
+        case 0x0...0x3FFF:
+            switch bankingMode {
+            case .simple:
+                return .rom(address: UInt32(address))
+            case .advanced:
+                if numberOfRomBanks <= 32 {
+                    return .rom(address: UInt32((address)))
+                }
+                if numberOfRomBanks == 64 {
+                    let zeroBankNumber = (UInt32(additionalRegister) & 0x1) << 5
+                    return .rom(address: (0x4000 * zeroBankNumber) + UInt32(address))
+                }
+                
+                if numberOfRomBanks == 128 {
+                    let zeroBankNumber = (UInt32(additionalRegister) & 0x3) << 5
+                    return .rom(address: (0x4000 * zeroBankNumber) + UInt32(address))
+                }
+            }
+        /// ROM bank 01-7F (read-only)
+        case 0x4000...0x7FFF:
+//            let adjustedRomBankNumber = romBankNumberRegister == 0 ? 1 : romBankNumberRegister
+//            let combinedRomBankNumber: UInt32 = (UInt32(additionalRegister) << 5) | UInt32(adjustedRomBankNumber)
+//            let memoryAddress: UInt32 = UInt32((combinedRomBankNumber * UInt32(romBankOffset)) + UInt32(address) - 0x4000)
+//            return memoryAddress
+            
+            if numberOfRomBanks <= 32 {
+                let highBankNumber = UInt32(romBankNumberRegister & bitmask)
+                return .rom(address: 0x4000 * highBankNumber + UInt32(address) - 0x4000)
+            }
+            
+            if numberOfRomBanks == 64 {
+                let highBankNumber = (UInt32(additionalRegister) & 0x1) << 5  | UInt32(romBankNumberRegister & bitmask)
+                return .rom(address: 0x4000 * highBankNumber + UInt32(address) - 0x4000)
+            }
+            
+            if numberOfRomBanks == 128 {
+                let highBankNumber = (UInt32(additionalRegister) & 0x3) << 5  | UInt32(romBankNumberRegister & bitmask)
+                return .rom(address: 0x4000 * highBankNumber + UInt32(address) - 0x4000)
+            }
+        /// RAM bank
+        case 0xA000...0xBFFF:
+            if !ramEnabled {
+                return .trash
+            }
+            
+            if ramSize <= 8192 {
+                return .ram(address: UInt32(UInt32(address - 0xA000) % ramSize))
+            }
+            
+            let memoryAddress = switch bankingMode {
+            case .simple:
+                address
+            case .advanced:
+                (0x2000 * UInt16(additionalRegister)) + (address - 0xA000)
+            }
+            return .ram(address: UInt32(memoryAddress - 0xA000))
+        default: return .trash
+        }
+        return .trash
+    }
+    
+    mutating func write(_ value: UInt8, at address: UInt16) -> MemoryBankControllerWriteAction {
         switch (address) {
         case 0x0...0x1FFF:
-            return ramEnabled = value == 0xA
+            ramEnabled = value == 0xA
+            return .writeInternal
         case 0x2000...0x3FFF:
-            var romBankValue = value & 0x1F
-            if romBankValue == 0 {
+            var romBankValue = value & bitmask
+            if ~romBankValue == 0 {
                 romBankValue += 1
             }
-            if romBankValue > romSize / 16 {
-                romBankValue &= UInt8((romSize / 16))
-            }
-            if romBankValue == 22 {
-                print("ROM EXCEED")
-            }
-            return romBankNumberRegister = romBankValue
+            romBankNumberRegister = romBankValue
+            return .writeInternal
         case 0x4000...0x5FFF:
-            if romSize < 1024 * 1024 { return }
-            return additionalRegister = value & 0x3
+            additionalRegister = value & 0x3
+            return .writeInternal
         case 0x6000...0x7FFF:
-            return bankingMode = (value & 0x1) == 0 ? .simple : .advanced
+            bankingMode = (value & 0x1) == 0 ? .simple : .advanced
+            return .writeInternal
+        case 0xA000...0xBFFF:
+            if ramEnabled {
+                if ramSize <= 8192 {
+                    let address = UInt32(UInt32(address - 0xA000) % ramSize)
+                    return .writeToRam(value: value, address: address)
+                }
+                
+                let memoryAddress = switch bankingMode {
+                case .simple:
+                    address
+                case .advanced:
+                    (0x2000 * UInt16(additionalRegister)) + (address - 0xA000)
+                }
+                let address = UInt32(memoryAddress - 0xA000)
+                return .writeToRam(value: value, address: address)
+            }
         default: break
         }
+        return .writeInternal
     }
 }
 

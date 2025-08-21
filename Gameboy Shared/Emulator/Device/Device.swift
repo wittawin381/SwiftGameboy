@@ -110,11 +110,13 @@ struct Device {
             writeMemory: { value, address in
                 switch address {
                 case 0x0...0x7FFF:
-                    return cartridge.memoryBankController.write(value, at: address)
+//                    return cartridge.memoryBankController.write(value, at: address)
+                    return cartridge.write(value, at: address)
                 case 0x8000...0x9FFF:
                     return vRam[address, offset: 0x8000] = value
                 case 0xA000...0xBFFF:
-                    return cartridge.memoryBankController.write(value, at: address)
+//                    return cartridge.memoryBankController.write(value, at: address)
+                    return cartridge.write(value, at: address)
                 case 0xC000...0xDFFF:
                     return internalRam[address, offset: 0xC000] = value
                 case 0xFE00...0xFE9F:
@@ -124,6 +126,7 @@ struct Device {
                         let dmaSourceAddress = UInt16(value) << 8
                         dmaTransferStart = true
                         dmaStartAddress = dmaSourceAddress
+                        return
 //                        dmaTransfer(sourceAddress: dmaSourceAddress)
                     }
                     return ioRegisters.write(value, at: address)
