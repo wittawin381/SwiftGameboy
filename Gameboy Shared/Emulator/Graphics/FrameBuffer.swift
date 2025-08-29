@@ -15,7 +15,7 @@ class Ref<Value> {
     }
 }
 
-struct FrameBuffer {
+public struct FrameBuffer {
     var ref: Ref<UnsafeMutablePointer<UInt8>>
     
     init() {

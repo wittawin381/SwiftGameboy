@@ -6,8 +6,8 @@
 //
 
 import Foundation
-    
-public struct CPU {
+
+public struct CPU: ~Copyable {
     public init() {
         self.instructionRegister = 0
         self.interruptMasterEnabled = false
@@ -19,7 +19,7 @@ public struct CPU {
         self.registerDE = Register(0x0)
         self.registerHL = Register(0x0)
     }
-    
+        
     public var instructionRegister: UInt8
     public var stackPointer: UInt16
     public var programCounter: UInt16
@@ -42,107 +42,93 @@ public struct CPU {
     }
     
     public var cycleCounter: Int = 0
+        
+    var pendingInstruction: InstructionV4?
     
-    public var pendingInstruction: Instruction?
-    
-    var tickCountEnabled: Bool = false
-    var tickCount: Int = 0
-    
-    mutating func advance(readMemory: (UInt16) -> UInt8, writeMemory: (UInt8, UInt16) -> Void) {
-        cycleCounter += 1
-        if let pendingInstruction{
-            if cycleCounter > (pendingInstruction.cycles * 4) - 1 {
-                pendingInstruction.perform(&self, readMemory, writeMemory)
-                cycleCounter = 0
-                self.pendingInstruction = nil
+    public mutating func updateFlag(_ flag: ALU.Flag) {
+        let zero = switch flag.zero {
+        case let .some(value):
+            value.toUInt8() << 7
+        case .noneAffected:
+            registerAF.lo & 0b1000_0000
+        }
+        
+        let subtract = switch flag.subtract {
+        case let .some(value):
+            value.toUInt8() << 6
+        case .noneAffected:
+            registerAF.lo & 0b0100_0000
+        }
+        
+        let halfCarry = switch flag.halfCarry {
+        case let .some(value):
+            value.toUInt8() << 5
+        case .noneAffected:
+            registerAF.lo & 0b0010_0000
+        }
+        
+        let carry = switch flag.carry {
+        case let .some(value):
+            value.toUInt8() << 4
+        case .noneAffected:
+            registerAF.lo & 0b0001_0000
+        }
+        
+        registerAF.lo = zero | subtract | halfCarry | carry
+    }
+}
+
+extension CPU {
+    static func run(on gb: inout GB) {
+        gb.cpu.cycleCounter += 1
+        if let pendingInstruction = gb.cpu.pendingInstruction {
+            if gb.cpu.cycleCounter > (pendingInstruction.cycles * 4) - 1 {
+                gb.cpu.pendingInstruction?.perform(&gb)
+                gb.cpu.cycleCounter = 0
+                gb.cpu.pendingInstruction = nil
             }
             return
         } else {
-            if isInterruptMasterEnabledRequest {
-                interruptMasterEnabled = true
-                isInterruptMasterEnabledRequest = false
+            if gb.cpu.isInterruptMasterEnabledRequest {
+                gb.cpu.interruptMasterEnabled = true
+                gb.cpu.isInterruptMasterEnabledRequest = false
             }
-            
-            handleInterrupt(readMemory: readMemory, writeMemory: writeMemory)
-            
-            if !isHalted {
-                
-                let opcode = readMemory(programCounter)
-                
-    //                    let printOpcode = if opcode == 0xCB {
-    //                        readMemory(programCounter + 1)
-    //                    } else {
-    //                        opcode
-    //                    }
-                
-                programCounter &+= 1
-                let instructionBuilder = InstructionBuilder.instructions[opcode]
+
+            handleInterrupt(gb: &gb)
+
+            if !gb.cpu.isHalted {
+
+                let opcode = gb.read(gb.cpu.programCounter)
+                gb.cpu.programCounter &+= 1
+                let instructionBuilder = InstructionBuilderV4.instructions[opcode]
                 if let instructionBuilder {
-                    let instruction = instructionBuilder.build(&self, readMemory, writeMemory)
-                    cycleCounter = 1
-                    pendingInstruction = instruction
+                    let instruction = instructionBuilder.build(&gb)
+                    gb.cpu.cycleCounter = 1
+                    gb.cpu.pendingInstruction = instruction
                 }
             }
         }
     }
     
-    public mutating func handleInterrupt(readMemory: (UInt16) -> UInt8, writeMemory: (UInt8, UInt16) -> Void) {
-        var interruptFlag = InterruptRegister(value: readMemory(0xFF0F))
+    private static func handleInterrupt(gb: inout GB) {
+        var interruptFlag = InterruptRegister(value: gb.read(0xFF0F))
         
-        if interruptEnable.value & interruptFlag.value != 0 {
-            isHalted = false
+        if gb.cpu.interruptEnable.value & interruptFlag.value != 0 {
+            gb.cpu.isHalted = false
         }
 
-        guard interruptMasterEnabled else { return }
+        guard gb.cpu.interruptMasterEnabled else { return }
                 
-        if let respondedInterrupt = interruptFlag.findFirstRespondedInterrupt(using: interruptEnable){
-            stackPointer -= 1
-            writeMemory(UInt8(programCounter >> 8), stackPointer)
-            stackPointer -= 1
-            writeMemory(UInt8(programCounter & 0xFF), stackPointer)
-            programCounter = respondedInterrupt.address
+        if let respondedInterrupt = interruptFlag.findFirstRespondedInterrupt(using: gb.cpu.interruptEnable) {
+            gb.cpu.stackPointer -= 1
+            gb.write(UInt8(gb.cpu.programCounter >> 8), to: gb.cpu.stackPointer)
+            gb.cpu.stackPointer -= 1
+            gb.write(UInt8(gb.cpu.programCounter & 0xFF), to: gb.cpu.stackPointer)
+            gb.cpu.programCounter = respondedInterrupt.address
             
             interruptFlag.unset(respondedInterrupt)
-            interruptMasterEnabled = false
-            writeMemory(interruptFlag.value, 0xFF0F)
+            gb.cpu.interruptMasterEnabled = false
+            gb.write(interruptFlag.value, to: 0xFF0F)
         }
-    }
-    
-    public mutating func updateFlag(_ flag: ALU.Flag) {
-        let flagValue = registerAF.lo
-        let flagZero = switch flag.zero {
-        case let .some(value):
-            value.toUInt8()
-        case .noneAffected:
-            (flagValue >> 7) & 0x1
-        }
-        
-        let flagSubtract = switch flag.subtract {
-        case let .some(value):
-            value.toUInt8()
-        case .noneAffected:
-            (flagValue >> 6) & 0x1
-        }
-        
-        let flagHalfCarry = switch flag.halfCarry {
-        case let .some(value):
-            value.toUInt8()
-        case .noneAffected:
-            (flagValue >> 5) & 0x1
-        }
-        
-        let flagCarry = switch flag.carry {
-        case let .some(value):
-            value.toUInt8()
-        case .noneAffected:
-            (flagValue >> 4) & 0x1
-        }
-        
-        registerAF.lo = createRegisterFValueFromFlag(
-            z: flagZero,
-            n: flagSubtract,
-            h: flagHalfCarry,
-            c: flagCarry
-        )
     }
 }

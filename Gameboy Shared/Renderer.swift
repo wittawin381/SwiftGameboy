@@ -31,7 +31,7 @@ class Renderer: NSObject, MTKViewDelegate {
     var pipelineState: MTLRenderPipelineState
     
     var frameBuffer = FrameBuffer()
-    var gameboy: Device
+    var gameboy: GB
     
     var frameDraw: Int = 0
     var frameCount: Int = 0
@@ -112,7 +112,7 @@ class Renderer: NSObject, MTKViewDelegate {
             fatalError("Error when initializing Metal: unable to create texture.")
         }
         
-        self.gameboy = Device(
+        self.gameboy = GB(
             vRamSize: 1024 * 8,
             internalRamSize: 1024 * 32,
             cartridge: cartridge,

@@ -93,6 +93,10 @@ public struct InterruptRegister {
     }
     
     private mutating func updateBit(at index: UInt8, value: Bool) {
-        self.value.setBit(at: index, to: value.toUInt8())
+        if value {
+            self.value.setBit(at: index)
+        } else {
+            self.value.unsetBit(at: index)
+        }
     }
 }

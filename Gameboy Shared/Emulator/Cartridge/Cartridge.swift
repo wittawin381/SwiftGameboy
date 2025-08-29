@@ -75,6 +75,5 @@ struct Cartridge {
         case .trash:
             return 0xFF
         }
-//        return data[address]
     }
 }

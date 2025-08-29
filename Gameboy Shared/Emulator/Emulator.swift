@@ -13,7 +13,7 @@ struct Emulator {
         case fileDecodingFailed(name: String, Swift.Error)
     }
     
-    func loadRom(_ name: String) throws -> Cartridge {
+    static func loadRom(_ name: String) throws -> Cartridge {
         guard let url = Bundle.main.url(
             forResource: name,
             withExtension: nil
@@ -33,7 +33,7 @@ struct Emulator {
         }
     }
     
-    func loadBootRom(_ name: String) throws -> [UInt8] {
+    static func loadBootRom(_ name: String) throws -> [UInt8] {
         guard let url = Bundle.main.url(
             forResource: name,
             withExtension: nil

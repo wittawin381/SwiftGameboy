@@ -28,7 +28,11 @@ protocol GBJoypadKeyRepresentable {
     var joypadKey: JoypadKey { get }
 }
 
-extension Device {
+protocol GBKeyEventHandler: ~Copyable {
+    mutating func keyEvent(_ event: KeyEvent)
+}
+
+extension GB {
     mutating func keyEvent(_ event: KeyEvent) {
         switch event {
         case let .keyUp(joypadKey):
