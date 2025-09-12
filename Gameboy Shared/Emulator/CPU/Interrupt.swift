@@ -67,27 +67,27 @@ public struct InterruptRegister {
         }
     }
     
-    private var vBlank: Bool {
+    var vBlank: Bool {
         get { value.bit(0) }
         set { updateBit(at: 0, value: newValue) }
     }
     
-    private var lcd: Bool {
+    var lcd: Bool {
         get { value.bit(1) }
         set { updateBit(at: 1, value: newValue) }
     }
     
-    private var timer: Bool {
+    var timer: Bool {
         get { value.bit(2) }
         set { updateBit(at: 2, value: newValue) }
     }
     
-    private var serial: Bool {
+    var serial: Bool {
         get { value.bit(3) }
         set { updateBit(at: 3, value: newValue) }
     }
     
-    private var joypad: Bool {
+    var joypad: Bool {
         get { value.bit(4) }
         set { updateBit(at: 4, value: newValue) }
     }

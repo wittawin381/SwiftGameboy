@@ -31,9 +31,9 @@ class GameViewController: UIViewController {
         mtkView.device = defaultDevice
         mtkView.backgroundColor = UIColor.black
         
-        guard let cartridge = try? Emulator().loadRom("cpu_instrs.gb") else { return }
+        guard let cartridge = try? Emulator.loadRom("03-op sp,hl.gb") else { return }
         
-        guard let bootRom = try? Emulator().loadBootRom("dmg_boot.bin") else { return }
+        guard let bootRom = try? Emulator.loadBootRom("dmg_boot.bin") else { return }
 
         guard let newRenderer = Renderer(
             metalKitView: mtkView,

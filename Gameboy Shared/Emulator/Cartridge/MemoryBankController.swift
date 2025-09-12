@@ -86,11 +86,6 @@ struct MBCVersion1: MemoryBankController {
             }
         /// ROM bank 01-7F (read-only)
         case 0x4000...0x7FFF:
-//            let adjustedRomBankNumber = romBankNumberRegister == 0 ? 1 : romBankNumberRegister
-//            let combinedRomBankNumber: UInt32 = (UInt32(additionalRegister) << 5) | UInt32(adjustedRomBankNumber)
-//            let memoryAddress: UInt32 = UInt32((combinedRomBankNumber * UInt32(romBankOffset)) + UInt32(address) - 0x4000)
-//            return memoryAddress
-            
             if numberOfRomBanks <= 32 {
                 let highBankNumber = UInt32(romBankNumberRegister & bitmask)
                 return .rom(address: 0x4000 * highBankNumber + UInt32(address) - 0x4000)

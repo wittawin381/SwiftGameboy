@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct IORegisters: ~Copyable {
+public struct IORegisters {
     /// dot cycle : 1 cycle = one of 4 MHz cpu cycle 4 dots = 1 M cycle
     var cycleCounter: UInt16 = 0
     
@@ -112,7 +112,7 @@ public struct IORegisters: ~Copyable {
     }
     
     enum PPUMode: RawRepresentable {
-        case mode0(cycleCounter: Int)
+        case mode0(cycleCounter: Int, initial: Bool = false)
         case mode1(cycleCounter: Int)
         case mode2(cycleCounter: Int)
         case mode3(cycleCounter: Int, pixelFetcher: PixelFetcher.ScanlineState)
@@ -222,17 +222,19 @@ public struct IORegisters: ~Copyable {
         }
     }
     
-    mutating func handleLCDStatusInterrupt() {
-        if lcdStatus.mode0, lcdStatus.ppuMode == 0 {
-            return interruptsFlag.set(.lcd)
-        } else if lcdStatus.mode1, lcdStatus.ppuMode == 1 {
-            return interruptsFlag.set(.lcd)
-        } else if lcdStatus.mode2, lcdStatus.ppuMode == 2 {
-            return interruptsFlag.set(.lcd)
-        } else if lcdStatus.lcdYCompare, lcdStatus.lcdYCompareEqual {
-            return interruptsFlag.set(.lcd)
-        }
-    }
+//    mutating func handleLCDStatusInterrupt() {
+//        if interruptsFlag.lcd { return }
+//        if lcdStatus.mode0, lcdStatus.ppuMode == 0 {
+//            return interruptsFlag.set(.lcd)
+//        } else if lcdStatus.mode1, lcdStatus.ppuMode == 1 {
+//            return interruptsFlag.set(.lcd)
+//        } else if lcdStatus.mode2, lcdStatus.ppuMode == 2 {
+//            return interruptsFlag.set(.lcd)
+//        } else if lcdStatus.lcdYCompare, lcdStatus.lcdYCompareEqual {
+////            lcdStatus.lcdYCompareEqual = false
+//            return interruptsFlag.set(.lcd)
+//        }
+//    }
     
     mutating func advance() {
         if isInterruptPending {

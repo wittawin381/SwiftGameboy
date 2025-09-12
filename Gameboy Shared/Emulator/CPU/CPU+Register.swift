@@ -1,14 +1,14 @@
 //
-//  Register.swift
+//  CPU+Register.swift
 //  Gameboy
 //
-//  Created by Wittawin Muangnoi on 28/7/2568 BE.
+//  Created by Wittawin Muangnoi on 10/10/2568 BE.
 //
 
 import Foundation
 
-public extension CPU {
-    struct Register {
+extension CPU {
+    public struct Register {
         private var _lo: UInt8
         private var _hi: UInt8
         

@@ -82,7 +82,6 @@ public enum ALU {
             flag: Flag(
                 zero: .some(result == 0),
                 subtract: .some(false),
-//                halfCarry: .some((((value ^ 1 ^ result) & 0x10) != 0)),
                 halfCarry: .some((value & 0x0F) + (1 & 0x0F) > 0x0F),
                 carry: .noneAffected
             )

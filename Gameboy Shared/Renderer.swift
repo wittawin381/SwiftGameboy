@@ -40,23 +40,7 @@ class Renderer: NSObject, MTKViewDelegate {
     func emulatorRun() {
         Task {
             while true {
-                cycleCount += 1
-                guard frameCount == 0 else { continue }
-                let action = gameboy.run()
-                switch action {
-                case .idle:
-                    break
-                case .drawFrame(let frameBuffer):
-                    self.frameBuffer = frameBuffer
-                    frameCount += 1
-                    if frameCount == 1 {
-//                        print("START", CACurrentMediaTime())
-                    }
-                    if frameCount == 60 {
-//                        print("END", CACurrentMediaTime())
-                        frameCount = 0
-                    }
-                }
+                gameboy.run()
             }
         }
     }
@@ -119,6 +103,8 @@ class Renderer: NSObject, MTKViewDelegate {
             bootRom: bootRom
         )
         
+        
+        
         super.init()
         
         #if os(macOS)
@@ -126,6 +112,11 @@ class Renderer: NSObject, MTKViewDelegate {
             gbMetalKitView.gbMetalKitViewDelegate = self
         }
         #endif
+        
+        gameboy.renderHandler = { frameBuffer in
+            self.frameCount += 1
+            self.frameBuffer = frameBuffer
+        }
     }
     
     private func makeLibrary(device: MTLDevice) -> MTLLibrary {

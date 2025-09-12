@@ -12,12 +12,12 @@ enum PixelFetcher {
         ScanlineState(state: .fetchTileNumber)
     }
     
-    struct Snapshot {
-        var x: UInt16 = 0
-        var y: UInt16 = 0
-    }
-    
     struct ScanlineState {
+        struct Snapshot {
+            var x: UInt16 = 0
+            var y: UInt16 = 0
+        }
+        
         var x: UInt16 = 0
         var y: UInt16 = 0
         
@@ -54,10 +54,16 @@ enum PixelFetcher {
             case pushPixelRow([PixelData])
         }
         
-        mutating func advance(delegate: PixelFetcherStrategy, vram: borrowing [UInt8]) -> AdvanceAction {
+        mutating func advance<Strategy: PixelFetcherStrategy>(
+            delegate: Strategy,
+            vram: borrowing [UInt8]
+        ) -> AdvanceAction {
             switch state {
             case .fetchTileNumber:
-                let tileNumber = delegate.pixelFetcherTileNumberFor(fetcherPosition: Position(x: x, y: y), from: vram)
+                let tileNumber = delegate.pixelFetcherTileNumberFor(
+                    fetcherPosition: Position(x: x, y: y),
+                    from: vram
+                )
                 
                 let usingUnsignedAddressing = delegate.tileDataArea == 0x8000 || delegate.tileDataArea == 0x9000
                 

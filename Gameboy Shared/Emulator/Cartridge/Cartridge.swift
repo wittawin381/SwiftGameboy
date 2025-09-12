@@ -9,8 +9,8 @@ import Foundation
 
 struct Cartridge {
     private var data: [UInt8]
-    var memoryBankController: MemoryBankController
-    var ram: [UInt8]
+    private var memoryBankController: MemoryBankController
+    private var ram: [UInt8]
     
     init(data: [UInt8]) throws {
         self.data = data

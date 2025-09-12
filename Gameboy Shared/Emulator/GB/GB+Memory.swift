@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol MemoryHandler: ~Copyable {
+public protocol MemoryHandler {
     func read(_ address: UInt16) -> UInt8
     mutating func write(_ value: UInt8, to address: UInt16)
 }
@@ -19,7 +19,7 @@ extension GB {
         }
     }
     
-    func read(_ address: UInt16) -> UInt8 {
+    public func read(_ address: UInt16) -> UInt8 {
         switch address {
         case 0x0...0x7FFF:
             if ioRegisters.bootSuccess {
@@ -51,7 +51,7 @@ extension GB {
         }
     }
     
-    mutating func write(_ value: UInt8, to address: UInt16) {
+    public mutating func write(_ value: UInt8, to address: UInt16) {
         switch address {
         case 0x0...0x7FFF:
             return cartridge.write(value, at: address)

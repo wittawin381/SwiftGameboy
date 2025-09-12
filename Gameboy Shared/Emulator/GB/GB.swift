@@ -7,19 +7,19 @@
 
 import Foundation
 
-public struct GB: ~Copyable, GBKeyEventHandler {
-    var cpu: CPU
-    var ppu: PPU
-    var ioRegisters: IORegisters
-    var cartridge: Cartridge
-    var internalRam: [UInt8]
-    var hRam: [UInt8]
-    var bootRom: [UInt8]
+public struct GB: GBKeyEventHandler, GBCPUHandler, GBPPUHandler {
+    public var cpu: CPU
+    internal var ppu: PPU
+    internal var ioRegisters: IORegisters
+    internal var cartridge: Cartridge
+    internal var internalRam: [UInt8]
+    internal var hRam: [UInt8]
+    internal var bootRom: [UInt8]
     
-    var pendingCycles: UInt8 = 0
+    private var pendingCycles: UInt8 = 0
     
     var renderHandler: (FrameBuffer) -> Void = { _ in }
-            
+                
     init(vRamSize: Int,
          internalRamSize: Int,
          cartridge: Cartridge,
@@ -34,16 +34,16 @@ public struct GB: ~Copyable, GBKeyEventHandler {
         self.bootRom = bootRom
     }
     
-    mutating func run() -> PPU.AdvanceAction {
-        CPU.run(on: &self)
-        ioRegisters.advance()
-        return PPU.run(on: &self)
+    mutating func run() {
+        advanceCPU()
     }
     
-    mutating func advance(cycles: UInt8) {
+    public mutating func advance(cycles: UInt8) {
         pendingCycles += cycles
-        while pendingCycles >= 1 {
-            let action = PPU.run(on: &self)
+        while pendingCycles > 0 {
+            ioRegisters.advance()
+
+            let action = advancePPU()
             switch action {
             case .idle: break
             case .drawFrame(let frameBuffer):
@@ -53,5 +53,3 @@ public struct GB: ~Copyable, GBKeyEventHandler {
         }
     }
 }
-
-

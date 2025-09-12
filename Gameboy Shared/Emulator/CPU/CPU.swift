@@ -7,7 +7,9 @@
 
 import Foundation
 
-public struct CPU: ~Copyable {
+var enableDebug: Bool = false
+
+public struct CPU {
     public init() {
         self.instructionRegister = 0
         self.interruptMasterEnabled = false
@@ -23,7 +25,7 @@ public struct CPU: ~Copyable {
     public var instructionRegister: UInt8
     public var stackPointer: UInt16
     public var programCounter: UInt16
-    
+        
     public var registerAF: Register
     public var registerBC: Register
     public var registerDE: Register
@@ -32,7 +34,7 @@ public struct CPU: ~Copyable {
     public var interruptEnable: InterruptRegister = .init(value: 0x0)
     public var isInterruptMasterEnabledRequest: Bool = false
     public var isHalted: Bool = false
-    
+        
     public var carryFlag: Bool {
         registerAF.lo.bit(4)
     }
@@ -43,8 +45,6 @@ public struct CPU: ~Copyable {
     
     public var cycleCounter: Int = 0
         
-    var pendingInstruction: InstructionV4?
-    
     public mutating func updateFlag(_ flag: ALU.Flag) {
         let zero = switch flag.zero {
         case let .some(value):
@@ -76,59 +76,106 @@ public struct CPU: ~Copyable {
         
         registerAF.lo = zero | subtract | halfCarry | carry
     }
-}
-
-extension CPU {
-    static func run(on gb: inout GB) {
-        gb.cpu.cycleCounter += 1
-        if let pendingInstruction = gb.cpu.pendingInstruction {
-            if gb.cpu.cycleCounter > (pendingInstruction.cycles * 4) - 1 {
-                gb.cpu.pendingInstruction?.perform(&gb)
-                gb.cpu.cycleCounter = 0
-                gb.cpu.pendingInstruction = nil
-            }
-            return
-        } else {
-            if gb.cpu.isInterruptMasterEnabledRequest {
-                gb.cpu.interruptMasterEnabled = true
-                gb.cpu.isInterruptMasterEnabledRequest = false
-            }
-
-            handleInterrupt(gb: &gb)
-
-            if !gb.cpu.isHalted {
-
-                let opcode = gb.read(gb.cpu.programCounter)
-                gb.cpu.programCounter &+= 1
-                let instructionBuilder = InstructionBuilderV4.instructions[opcode]
-                if let instructionBuilder {
-                    let instruction = instructionBuilder.build(&gb)
-                    gb.cpu.cycleCounter = 1
-                    gb.cpu.pendingInstruction = instruction
-                }
-            }
+    
+    mutating func setRegister(_ registerIndex: UInt8, value: UInt8) {
+        switch registerIndex {
+        case 0:
+            registerBC.hi = value
+        case 1:
+            registerBC.lo = value
+        case 2:
+            registerDE.hi = value
+        case 3:
+            registerDE.lo = value
+        case 4:
+            registerHL.hi = value
+        case 5:
+            registerHL.lo = value
+        case 7:
+            registerAF.hi = value
+        default:
+            fatalError("index out of range")
         }
     }
     
-    private static func handleInterrupt(gb: inout GB) {
-        var interruptFlag = InterruptRegister(value: gb.read(0xFF0F))
-        
-        if gb.cpu.interruptEnable.value & interruptFlag.value != 0 {
-            gb.cpu.isHalted = false
+    func getRegister(_ registerIndex: UInt8) -> UInt8 {
+        return switch registerIndex {
+        case 0:
+            registerBC.hi
+        case 1:
+            registerBC.lo
+        case 2:
+            registerDE.hi
+        case 3:
+            registerDE.lo
+        case 4:
+            registerHL.hi
+        case 5:
+            registerHL.lo
+        case 7:
+            registerAF.hi
+        default:
+            fatalError("index out of range")
         }
-
-        guard gb.cpu.interruptMasterEnabled else { return }
-                
-        if let respondedInterrupt = interruptFlag.findFirstRespondedInterrupt(using: gb.cpu.interruptEnable) {
-            gb.cpu.stackPointer -= 1
-            gb.write(UInt8(gb.cpu.programCounter >> 8), to: gb.cpu.stackPointer)
-            gb.cpu.stackPointer -= 1
-            gb.write(UInt8(gb.cpu.programCounter & 0xFF), to: gb.cpu.stackPointer)
-            gb.cpu.programCounter = respondedInterrupt.address
-            
-            interruptFlag.unset(respondedInterrupt)
-            gb.cpu.interruptMasterEnabled = false
-            gb.write(interruptFlag.value, to: 0xFF0F)
+    }
+    
+    mutating func setPairedRegisterWithSP(_ registerIndex: UInt8, value: UInt16) {
+        switch registerIndex {
+        case 0:
+            registerBC.all = value
+        case 1:
+            registerDE.all = value
+        case 2:
+            registerHL.all = value
+        case 3:
+            stackPointer = value
+        default:
+            fatalError("index out of range")
+        }
+    }
+    
+    func getPairedRegisterWithSP(_ registerIndex: UInt8) -> UInt16 {
+        return switch registerIndex {
+        case 0:
+            registerBC.all
+        case 1:
+            registerDE.all
+        case 2:
+            registerHL.all
+        case 3:
+            stackPointer
+        default:
+            fatalError("index out of range")
+        }
+    }
+    
+    mutating func setPairedRegisterWithAF(_ registerIndex: UInt8, value: UInt16) {
+        switch registerIndex {
+        case 0:
+            registerBC.all = value
+        case 1:
+            registerDE.all = value
+        case 2:
+            registerHL.all = value
+        case 3:
+            registerAF.all = value & 0xFFF0
+        default:
+            fatalError("index out of range")
+        }
+    }
+    
+    func getPairedRegisterWithAF(_ registerIndex: UInt8) -> UInt16 {
+        return switch registerIndex {
+        case 0:
+            registerBC.all
+        case 1:
+            registerDE.all
+        case 2:
+            registerHL.all
+        case 3:
+            registerAF.all
+        default:
+            fatalError("index out of range")
         }
     }
 }
