@@ -58,6 +58,7 @@
 				"Emulator/GB/GB+KeyEvent.swift",
 				"Emulator/GB/GB+Memory.swift",
 				Emulator/GB/IORegisters.swift,
+				Emulator/Graphics/Buffer.swift,
 				Emulator/Graphics/FrameBuffer.swift,
 				Emulator/Graphics/PixelData.swift,
 				Emulator/Graphics/PixelFetcher.swift,
@@ -74,6 +75,8 @@
 				"Extension/UInt8+Extension.swift",
 				Renderer.swift,
 				Roms/dmg_boot.bin,
+				"Roms/Donkey Kong Land (USA, Europe) (SGB Enhanced).gb",
+				"Roms/Kirby's Dream Land (USA, Europe).gb",
 				Shaders.metal,
 			);
 			target = 25B08F1E2E1422C400BB39AF /* Gameboy iOS */;
@@ -85,6 +88,8 @@
 				GBMetalKitView.swift,
 				Renderer.swift,
 				Roms/dmg_boot.bin,
+				"Roms/Donkey Kong Land (USA, Europe) (SGB Enhanced).gb",
+				"Roms/Kirby's Dream Land (USA, Europe).gb",
 				Shaders.metal,
 			);
 			target = 25B08F2F2E1422C400BB39AF /* Gameboy tvOS */;
@@ -106,6 +111,7 @@
 				"Emulator/GB/GB+KeyEvent.swift",
 				"Emulator/GB/GB+Memory.swift",
 				Emulator/GB/IORegisters.swift,
+				Emulator/Graphics/Buffer.swift,
 				Emulator/Graphics/FrameBuffer.swift,
 				Emulator/Graphics/PixelData.swift,
 				Emulator/Graphics/PixelFetcher.swift,
@@ -123,6 +129,8 @@
 				GBMetalKitView.swift,
 				Renderer.swift,
 				Roms/dmg_boot.bin,
+				"Roms/Donkey Kong Land (USA, Europe) (SGB Enhanced).gb",
+				"Roms/Kirby's Dream Land (USA, Europe).gb",
 				Shaders.metal,
 			);
 			target = 25B08F3F2E1422C400BB39AF /* Gameboy macOS */;

@@ -2141,22 +2141,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "C4F80407-878E-4385-8000-F613A86AC22B"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Gameboy Shared/Emulator/GB/IORegisters.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "235"
-            endingLineNumber = "235"
-            landmarkName = "IORegisters"
-            landmarkType = "14">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "2580E6E9-81F9-4824-91A6-E36923BBAB84"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -2164,8 +2148,8 @@
             filePath = "Gameboy Shared/Emulator/CPU/CPU+GBCPUHandler.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "33"
-            endingLineNumber = "33"
+            startingLineNumber = "23"
+            endingLineNumber = "23"
             landmarkName = "advanceCPU()"
             landmarkType = "7">
          </BreakpointContent>
@@ -2221,54 +2205,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "1CE80176-6076-45F8-8B14-785085E7FC54"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Gameboy Shared/Emulator/GB/IORegisters.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "228"
-            endingLineNumber = "228"
-            landmarkName = "IORegisters"
-            landmarkType = "14">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "7528D1B2-E9B9-4991-AC9A-6F6A2749FE0F"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Gameboy Shared/Emulator/GB/IORegisters.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "230"
-            endingLineNumber = "230"
-            landmarkName = "IORegisters"
-            landmarkType = "14">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "B54D606E-6387-4151-B282-328D56AC6636"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Gameboy Shared/Emulator/GB/IORegisters.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "232"
-            endingLineNumber = "232"
-            landmarkName = "IORegisters"
-            landmarkType = "14">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "6343CC9D-E93D-4B54-A61D-9C13E628560B"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -2276,8 +2212,8 @@
             filePath = "Gameboy Shared/Emulator/CPU/CPU+GBCPUHandler.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "229"
-            endingLineNumber = "229"
+            startingLineNumber = "219"
+            endingLineNumber = "219"
             landmarkName = "handleInterrupt()"
             landmarkType = "7">
          </BreakpointContent>
@@ -2292,8 +2228,8 @@
             filePath = "Gameboy Shared/Emulator/Graphics/PPU+GBPPUHandler.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "133"
-            endingLineNumber = "133"
+            startingLineNumber = "126"
+            endingLineNumber = "126"
             landmarkName = "advancePPU()"
             landmarkType = "7">
          </BreakpointContent>
@@ -2308,8 +2244,8 @@
             filePath = "Gameboy Shared/Emulator/Graphics/PPU+GBPPUHandler.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "125"
-            endingLineNumber = "125"
+            startingLineNumber = "118"
+            endingLineNumber = "118"
             landmarkName = "advancePPU()"
             landmarkType = "7">
          </BreakpointContent>
@@ -2324,8 +2260,8 @@
             filePath = "Gameboy Shared/Emulator/Graphics/PPU+GBPPUHandler.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "106"
-            endingLineNumber = "106"
+            startingLineNumber = "99"
+            endingLineNumber = "99"
             landmarkName = "advancePPU()"
             landmarkType = "7">
          </BreakpointContent>
@@ -2344,6 +2280,22 @@
             endingLineNumber = "24"
             landmarkName = "pixelFetcherTileNumberFor(fetcherPosition:from:)"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F128FD92-6456-4CB5-BB6F-084CB1776D59"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Gameboy Shared/Emulator/CPU/Instructions/Instruction.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "6"
+            endingLineNumber = "6"
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

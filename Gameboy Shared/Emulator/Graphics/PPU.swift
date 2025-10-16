@@ -100,9 +100,13 @@ public struct PPU  {
         }
     }
     
-    func scanSpriteAttributes(atLine line: UInt8, fromOAM oam: borrowing [UInt8], ioRegisters: borrowing IORegisters) -> Deque<Sprite> {
+    func scanSpriteAttributes(
+        atLine line: UInt8,
+        fromOAM oam: borrowing [UInt8],
+        ioRegisters: borrowing IORegisters,
+        into buffer: inout Deque<Sprite>,
+    ) {
         var currentAddress: UInt16 = 0xFE00
-        var buffer: Deque<Sprite> = []
         while buffer.count <= 10, currentAddress <= 0xFE9F {
             let yPosition = oam[currentAddress, offset: 0xFE00]
             let xPosition = oam[currentAddress + 1, offset: 0xFE00]
@@ -124,8 +128,6 @@ public struct PPU  {
             
             currentAddress += 4
         }
-        
-        return buffer
     }
 }
 

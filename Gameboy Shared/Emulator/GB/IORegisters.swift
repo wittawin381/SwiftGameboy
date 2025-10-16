@@ -222,20 +222,6 @@ public struct IORegisters {
         }
     }
     
-//    mutating func handleLCDStatusInterrupt() {
-//        if interruptsFlag.lcd { return }
-//        if lcdStatus.mode0, lcdStatus.ppuMode == 0 {
-//            return interruptsFlag.set(.lcd)
-//        } else if lcdStatus.mode1, lcdStatus.ppuMode == 1 {
-//            return interruptsFlag.set(.lcd)
-//        } else if lcdStatus.mode2, lcdStatus.ppuMode == 2 {
-//            return interruptsFlag.set(.lcd)
-//        } else if lcdStatus.lcdYCompare, lcdStatus.lcdYCompareEqual {
-////            lcdStatus.lcdYCompareEqual = false
-//            return interruptsFlag.set(.lcd)
-//        }
-//    }
-    
     mutating func advance() {
         if isInterruptPending {
             if timerCycleCounter < 4 {

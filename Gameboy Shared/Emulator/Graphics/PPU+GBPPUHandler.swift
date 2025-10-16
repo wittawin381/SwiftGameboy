@@ -7,21 +7,13 @@
 
 import Foundation
 
-protocol GBPPUHandler: MemoryHandler {
-    var ppu: PPU { get set }
-    var ioRegisters: IORegisters { get set }
-    
-    mutating func advancePPU() -> PPU.AdvanceAction
-}
-
 enum PPUCycle {
     case enterMode2(cycleCount: Int)
     case cycleMode2(cycleCount: Int)
+    case enterMode3(cycleCount: Int)
 }
 
-extension GBPPUHandler {
-    
-    
+extension GB {
     mutating func advancePPU() -> PPU.AdvanceAction {
         if !ioRegisters.lcdControl.lcdDisplayEnabled { return .idle }
                 
@@ -35,10 +27,11 @@ extension GBPPUHandler {
                 if !ppu.windowYCondition {
                     ppu.windowYCondition = ioRegisters.wy == ioRegisters.lcdY
                 }
-                ppu.spritesBuffer = ppu.scanSpriteAttributes(
+                ppu.scanSpriteAttributes(
                     atLine: ioRegisters.lcdY,
                     fromOAM: ppu.objectAttributeMemory,
-                    ioRegisters: ioRegisters
+                    ioRegisters: ioRegisters,
+                    into: &ppu.spritesBuffer
                 )
                 ioRegisters.ppuMode = .mode2(cycleCounter: cycleCounter + 1)
                 return .idle
@@ -58,7 +51,7 @@ extension GBPPUHandler {
                 ppu.windowXCondition = true
                 
                 if ppu.isWindowDisplayOnScanline(windowEnabled: ioRegisters.lcdControl.windowEnabled) {
-                    ppu.backgroundFIFO = []
+                    ppu.backgroundFIFO.removeAll()
                     pixelFetcher.reset()
                     ppu.windowInternalLineCounter &+= 1
                 }
@@ -81,7 +74,7 @@ extension GBPPUHandler {
                             ppu.backgroundFIFO[i] = ppu.spriteFIFO[i]
                         }
                     }
-                    ppu.spriteFIFO = []
+                    ppu.spriteFIFO.removeAll()
                 }
                 ppu.frameBuffer.value[Int(ppu.pixelY) * 160 + Int(ppu.pixelX)] = ppu.backgroundFIFO.popFirst()?.color ?? 0;
                 ppu.pixelX += 1
@@ -124,9 +117,9 @@ extension GBPPUHandler {
             if ppu.pixelX == 159 {
                 ppu.pixelX = 0
                 ppu.pixelY += 1
-                ppu.backgroundFIFO = []
-                ppu.spriteFIFO = []
-                ppu.spritesBuffer = []
+                ppu.backgroundFIFO.removeAll()
+                ppu.spriteFIFO.removeAll()
+                ppu.spritesBuffer.removeAll()
                 ppu.windowInternalXCounter = 0
                 ppu.windowXCondition = false
                 ppu.fetchType = .background
@@ -163,9 +156,9 @@ extension GBPPUHandler {
                 if ioRegisters.lcdY > 153 {
                     ppu.windowXCondition = false
                     ppu.windowYCondition = false
-                    ppu.backgroundFIFO = []
-                    ppu.spriteFIFO = []
-                    ppu.spritesBuffer = []
+                    ppu.backgroundFIFO.removeAll()
+                    ppu.spriteFIFO.removeAll()
+                    ppu.spritesBuffer.removeAll()
                     ppu.windowInternalXCounter = 0
                     ppu.windowInternalLineCounter = 255
                     ioRegisters.lcdY = 0

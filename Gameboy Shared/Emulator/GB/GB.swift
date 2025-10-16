@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct GB: GBKeyEventHandler, GBCPUHandler, GBPPUHandler {
+public struct GB: GBKeyEventHandler {
     public var cpu: CPU
     internal var ppu: PPU
     internal var ioRegisters: IORegisters
