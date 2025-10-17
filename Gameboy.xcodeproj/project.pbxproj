@@ -34,10 +34,6 @@
 			membershipExceptions = (
 				Emulator/Graphics/FrameBuffer.swift,
 				Emulator/Graphics/PixelFetcher.swift,
-				"Emulator/Graphics/PixelFetcherStrategy/PixelFetcher+Background.swift",
-				"Emulator/Graphics/PixelFetcherStrategy/PixelFetcher+Sprite.swift",
-				"Emulator/Graphics/PixelFetcherStrategy/PixelFetcher+Strategy.swift",
-				"Emulator/Graphics/PixelFetcherStrategy/PixelFetcher+Window.swift",
 			);
 			target = 254449442E4722050081DE36 /* GameboyTests */;
 		};
@@ -62,10 +58,6 @@
 				Emulator/Graphics/FrameBuffer.swift,
 				Emulator/Graphics/PixelData.swift,
 				Emulator/Graphics/PixelFetcher.swift,
-				"Emulator/Graphics/PixelFetcherStrategy/PixelFetcher+Background.swift",
-				"Emulator/Graphics/PixelFetcherStrategy/PixelFetcher+Sprite.swift",
-				"Emulator/Graphics/PixelFetcherStrategy/PixelFetcher+Strategy.swift",
-				"Emulator/Graphics/PixelFetcherStrategy/PixelFetcher+Window.swift",
 				Emulator/Graphics/PPU.swift,
 				"Emulator/Graphics/PPU+GBPPUHandler.swift",
 				Extension/BitAccessible.swift,
@@ -115,10 +107,6 @@
 				Emulator/Graphics/FrameBuffer.swift,
 				Emulator/Graphics/PixelData.swift,
 				Emulator/Graphics/PixelFetcher.swift,
-				"Emulator/Graphics/PixelFetcherStrategy/PixelFetcher+Background.swift",
-				"Emulator/Graphics/PixelFetcherStrategy/PixelFetcher+Sprite.swift",
-				"Emulator/Graphics/PixelFetcherStrategy/PixelFetcher+Strategy.swift",
-				"Emulator/Graphics/PixelFetcherStrategy/PixelFetcher+Window.swift",
 				Emulator/Graphics/PPU.swift,
 				"Emulator/Graphics/PPU+GBPPUHandler.swift",
 				Extension/BitAccessible.swift,

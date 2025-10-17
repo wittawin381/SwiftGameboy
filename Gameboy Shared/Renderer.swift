@@ -21,7 +21,6 @@ enum RendererError: Error {
 }
 
 class Renderer: NSObject, MTKViewDelegate {
-    
     public let device: MTLDevice
     weak var metalKitView: MTKView?
     let vertexBuffer: MTLBuffer
@@ -38,9 +37,9 @@ class Renderer: NSObject, MTKViewDelegate {
     var cycleCount: Int = 0
     
     func emulatorRun() {
-        Task {
+        DispatchQueue.global(qos: .userInitiated).async {
             while true {
-                gameboy.run()
+                self.gameboy.run()
             }
         }
     }
@@ -132,8 +131,6 @@ class Renderer: NSObject, MTKViewDelegate {
         
         //TODO: wait = gameboy clock
 //        _ = inFlightSemaphore.wait(timeout: DispatchTime.distantFuture)
-        guard frameCount > 0 else { return }
-        frameCount -= 1
         
 //        print("START", Date.now.timeIntervalSince1970)
         if let commandBuffer = commandQueue.makeCommandBuffer() {
@@ -176,7 +173,7 @@ class Renderer: NSObject, MTKViewDelegate {
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         /// Respond to drawable size or orientation changes here
         
-        let aspect = Float(size.width) / Float(size.height)
+//        let aspect = Float(size.width) / Float(size.height)
 //        projectionMatrix = matrix_perspective_right_hand(fovyRadians: radians_from_degrees(65), aspectRatio:aspect, nearZ: 0.1, farZ: 100.0)
     }
 }

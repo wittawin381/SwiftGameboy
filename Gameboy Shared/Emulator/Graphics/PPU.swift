@@ -11,23 +11,13 @@ import DequeModule
 public struct PPU  {
     typealias InterruptRequestHandler = (InterruptType) -> Void
     
-    enum FetchType {
-        case background
-        case sprite(Sprite)
-    }
-    
-    enum InterruptType {
-        case stat
-        case vBlank
-    }
-    
     var frameBuffer = FrameBuffer()
     var vRam: [UInt8]
     var objectAttributeMemory: [UInt8]
     
     var fetchType: FetchType = .background
-    var backgroundFIFO: Deque<PixelData> = []
-    var spriteFIFO: Deque<PixelData> = []
+    var backgroundFIFO: Buffer<PixelData> = .init(maxSize: 16)
+    var spriteFIFO: Buffer<PixelData> = .init(maxSize: 16)
     var spritesBuffer: Deque<Sprite> = []
     var windowInternalXCounter: UInt8 = 0
     var windowInternalLineCounter: UInt8 = 255
@@ -39,6 +29,17 @@ public struct PPU  {
     func isWindowDisplayOnScanline(windowEnabled: Bool) -> Bool {
         windowXCondition && windowYCondition && windowEnabled
     }
+    
+    enum FetchType {
+        case background
+        case sprite(Sprite)
+    }
+    
+    enum InterruptType {
+        case stat
+        case vBlank
+    }
+    
     
     init(vRamSize: Int) {
         self.vRam = Array(repeating: 0, count: vRamSize)
@@ -72,18 +73,18 @@ public struct PPU  {
         case drawFrame(FrameBuffer)
     }
     
-    func makePixelFetcherDelegate(ioRegisters: borrowing IORegisters) -> PixelFetcherStrategy {
+    func makePixelFetcherDelegate(ioRegisters: borrowing IORegisters) -> PixelFetcher.FetchType {
         switch fetchType {
         case .background:
             if isWindowDisplayOnScanline(windowEnabled: ioRegisters.lcdControl.windowEnabled) {
-                WindowPixelFetcherStrategy(
+                .window(
                     windowInternalXCounter: windowInternalXCounter,
                     windowInternalLineCounter: windowInternalLineCounter,
                     tileMapArea: ioRegisters.lcdControl.windowTileMapArea,
                     tileDataArea: ioRegisters.lcdControl.tileDataArea
                 )
             } else {
-                BackgroundPixelFetcherStrategy(
+                .background(
                     scx: ioRegisters.scx,
                     scy: ioRegisters.scy,
                     lcdY: ioRegisters.lcdY,
@@ -92,10 +93,9 @@ public struct PPU  {
                 )
             }
         case let .sprite(sprite):
-            SpritePixelFetcherStrategy(
+                .sprite(
                 lcdY: ioRegisters.lcdY,
                 sprite: sprite,
-                tileDataArea: 0x8000
             )
         }
     }

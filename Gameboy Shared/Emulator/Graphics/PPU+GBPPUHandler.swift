@@ -64,8 +64,7 @@ extension GB {
                 }
             }
             
-            if case .background = ppu.fetchType,
-               ppu.backgroundFIFO.count > 8 {
+            if case .background = ppu.fetchType, ppu.backgroundFIFO.count > 8 {
                 if !ppu.spriteFIFO.isEmpty {
                     for i in 0..<min(ppu.backgroundFIFO.count, ppu.spriteFIFO.count) {
                         if !(ppu.spriteFIFO[i].color == 0 ||
@@ -76,7 +75,8 @@ extension GB {
                     }
                     ppu.spriteFIFO.removeAll()
                 }
-                ppu.frameBuffer.value[Int(ppu.pixelY) * 160 + Int(ppu.pixelX)] = ppu.backgroundFIFO.popFirst()?.color ?? 0;
+                ppu.frameBuffer.value[Int(ppu.pixelY) * 160 + Int(ppu.pixelX)] = ppu.backgroundFIFO.dequeue().color;
+//                ppu.frameBuffer.value[Int(ppu.pixelY) * 160 + Int(ppu.pixelX)] = ppu.backgroundFIFO.popFirst()?.color ?? 0;
                 ppu.pixelX += 1
             }
             
@@ -89,21 +89,24 @@ extension GB {
                 }
             }
                         
-            let action = pixelFetcher.advance(delegate: ppu.makePixelFetcherDelegate(ioRegisters: ioRegisters), vram: ppu.vRam)
+            let action = pixelFetcher.advance(fetchType: ppu.makePixelFetcherDelegate(ioRegisters: ioRegisters), vram: ppu.vRam)
             
             switch action {
             case .idle:
-                break;
+                break
             case .incrementXCounter:
-                if ppu.isWindowDisplayOnScanline(windowEnabled: ioRegisters.lcdControl.windowEnabled) {
-                    ppu.windowInternalXCounter &+= 1
-                }
                 break
             case var .pushPixelRow(pixels):
                 switch ppu.fetchType {
                 case .background:
-                    ppu.backgroundFIFO.append(contentsOf: pixels)
-                    
+                    if ppu.isWindowDisplayOnScanline(windowEnabled: ioRegisters.lcdControl.windowEnabled) {
+                        ppu.windowInternalXCounter &+= 1
+                    }
+//                    ppu.backgroundFIFO.append(contentsOf: pixels)
+                    for pixel in pixels {
+                        ppu.backgroundFIFO.enqueue(pixel)
+                    }
+//                    print(ppu.backgroundFIFO.count)
                 case let .sprite(sprite):
                     if sprite.position.x < 8 {
                         let shiftedOutPixelCount = 8 - sprite.position.x
@@ -114,7 +117,7 @@ extension GB {
                     ppu.fetchType = .background
                 }
             }
-            if ppu.pixelX == 159 {
+            if ppu.pixelX > 159 {
                 ppu.pixelX = 0
                 ppu.pixelY += 1
                 ppu.backgroundFIFO.removeAll()

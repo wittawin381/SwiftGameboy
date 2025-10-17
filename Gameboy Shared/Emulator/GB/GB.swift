@@ -6,8 +6,10 @@
 //
 
 import Foundation
+import QuartzCore
 
 public struct GB: GBKeyEventHandler {
+    
     public var cpu: CPU
     internal var ppu: PPU
     internal var ioRegisters: IORegisters
@@ -19,6 +21,9 @@ public struct GB: GBKeyEventHandler {
     private var pendingCycles: UInt8 = 0
     
     var renderHandler: (FrameBuffer) -> Void = { _ in }
+    
+    var nextRenderTime: CFTimeInterval = .zero
+    var framePending: Bool = false
                 
     init(vRamSize: Int,
          internalRamSize: Int,
@@ -35,7 +40,16 @@ public struct GB: GBKeyEventHandler {
     }
     
     mutating func run() {
-        advanceCPU()
+        if nextRenderTime == .zero {
+            nextRenderTime = CACurrentMediaTime() + 0.016
+        }
+        let currentTime = CACurrentMediaTime()
+        if currentTime < nextRenderTime, !framePending {
+            advanceCPU()
+        } else if currentTime >= nextRenderTime {
+            framePending = false
+            nextRenderTime = CACurrentMediaTime() + 0.016
+        }
     }
     
     public mutating func advance(cycles: UInt8) {
@@ -48,6 +62,8 @@ public struct GB: GBKeyEventHandler {
             case .idle: break
             case .drawFrame(let frameBuffer):
                 renderHandler(frameBuffer)
+//                renderTime = CACurrentMediaTime()
+                framePending = true
             }
             pendingCycles -= 1
         }
